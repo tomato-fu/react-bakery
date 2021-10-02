@@ -1,0 +1,60 @@
+import { v4 as uuid } from "uuid";
+
+export default [
+  {
+    orderID: uuid(),
+    customer: "Josh Miao",
+    pickTime: 1632077805000,
+    placedDate: 1555016400000,
+    fulfilled: true,
+    comment: "Don't add peanut!",
+  },
+  {
+    orderID: uuid(),
+    customer: "Josh Miao",
+    pickTime: 1632077805000,
+    placedDate: 1555016400000,
+    fulfilled: false,
+    comment: "Don't add peanut!",
+  },
+  {
+    orderID: uuid(),
+    customer: "Josh Miao",
+    pickTime: 1632077805000,
+    placedDate: 1555016400000,
+    fulfilled: true,
+    comment: "Don't add peanut!",
+  },
+  {
+    orderID: uuid(),
+    customer: "Josh Miao",
+    pickTime: 1632077805000,
+    placedDate: 1555016400000,
+    fulfilled: false,
+    comment: "Don't add peanut!",
+  },
+  {
+    orderID: uuid(),
+    customer: "Josh Miao",
+    pickTime: 1632077805000,
+    placedDate: 1555016400000,
+    fulfilled: true,
+    comment: "Don't add peanut!",
+  },
+  {
+    orderID: uuid(),
+    customer: "Josh Miao",
+    pickTime: 1632077805000,
+    placedDate: 1555016400000,
+    fulfilled: true,
+    comment: "Don't add peanut!",
+  },
+  {
+    orderID: uuid(),
+    customer: "Josh Miao",
+    pickTime: 1632077805000,
+    placedDate: 1555016400000,
+    fulfilled: true,
+    comment: "Don't add peanut!",
+  },
+];

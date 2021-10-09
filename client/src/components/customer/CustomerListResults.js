@@ -18,13 +18,17 @@ import {
 import CustomerListToolbar from "./CustomerListToolbar";
 import CustomerListHeader from "./CustomerListHeader";
 
-const CustomerListResults = ({ customers, ...rest }) => {
-  const [customerData, setCustomerData] = useState(customers);
+const CustomerListResults = ({
+  customers,
+  setCustomers,
+  update,
+  setUpdate,
+}) => {
   const [selectedCustomerIds, setSelectedCustomerIds] = useState([]);
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("email");
+  const [orderBy, setOrderBy] = useState("customerName");
 
   function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -58,7 +62,7 @@ const CustomerListResults = ({ customers, ...rest }) => {
     let newSelectedCustomerIds;
 
     if (event.target.checked) {
-      newSelectedCustomerIds = customerData.map((customer) => customer.id);
+      newSelectedCustomerIds = customers.map((customer) => customer.ID);
     } else {
       newSelectedCustomerIds = [];
     }
@@ -115,102 +119,41 @@ const CustomerListResults = ({ customers, ...rest }) => {
       <Box>
         <CustomerListToolbar
           numSelected={selectedCustomerIds.length}
-          customers={customerData}
-          setCustomers={setCustomerData}
+          selectedIds={selectedCustomerIds}
+          setSelectedIds={setSelectedCustomerIds}
+          customers={customers}
+          setCustomers={setCustomers}
+          update={update}
+          setUpdate={setUpdate}
         />
       </Box>
-      <Card {...rest}>
+      <Card>
         <PerfectScrollbar>
           <Box sx={{ minWidth: 1050 }}>
             <Table>
-              {/* <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selectedCustomerIds.length === customers.length}
-                      color="primary"
-                      indeterminate={
-                        selectedCustomerIds.length > 0 &&
-                        selectedCustomerIds.length < customers.length
-                      }
-                      onChange={handleSelectAll}
-                    />
-                  </TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Location</TableCell>
-                  <TableCell>Phone</TableCell>
-                  <TableCell>Registration date</TableCell>
-                </TableRow>
-              </TableHead> */}
               <CustomerListHeader
                 numSelected={selectedCustomerIds.length}
                 order={order}
                 orderBy={orderBy}
                 onSelectAllClick={handleSelectAll}
                 onRequestSort={handleRequestSort}
-                rowCount={customerData.length}
+                rowCount={customers.length}
               />
               <TableBody>
-                {/* {customers
-                  .slice(page * limit, page * limit + limit)
-                  .map((customer) => (
-                    <TableRow
-                      hover
-                      key={customer.id}
-                      selected={selectedCustomerIds.indexOf(customer.id) !== -1}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={
-                            selectedCustomerIds.indexOf(customer.id) !== -1
-                          }
-                          onChange={(event) =>
-                            handleSelectOne(event, customer.id)
-                          }
-                          value="true"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{
-                            alignItems: "center",
-                            display: "flex",
-                          }}
-                        >
-                          <Avatar src={customer.avatarUrl} sx={{ mr: 2 }}>
-                            {getInitials(customer.name)}
-                          </Avatar>
-                          <Typography color="textPrimary" variant="body1">
-                            {customer.name}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>{customer.email}</TableCell>
-                      <TableCell>
-                        {`${customer.address.city}, ${customer.address.state}, ${customer.address.country}`}
-                      </TableCell>
-                      <TableCell>{customer.phone}</TableCell>
-                      <TableCell>
-                        {moment(customer.createdAt).format("DD/MM/YYYY")}
-                      </TableCell>
-                    </TableRow>
-                  ))} */}
-
-                {stableSort(customerData, getComparator(order, orderBy))
+                {stableSort(customers, getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
+                    const isItemSelected = isSelected(row.ID);
                     const labelId = `enhanced-table-checkbox-${index}`;
 
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleSelectOne(event, row.id)}
+                        onClick={(event) => handleSelectOne(event, row.ID)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.id}
+                        key={row.ID}
                         selected={isItemSelected}
                       >
                         <TableCell padding="checkbox">
@@ -229,19 +172,19 @@ const CustomerListResults = ({ customers, ...rest }) => {
                           padding="none"
                           align="center"
                         >
-                          {row.name}
+                          {row.CustomerName}
                         </TableCell>
-                        <TableCell align="center">{row.email}</TableCell>
-                        <TableCell align="center">{`${row.address.city}, ${row.address.state}, ${row.address.country}`}</TableCell>
-                        <TableCell align="center">{row.phone}</TableCell>
+                        <TableCell align="center">{row.WeChatID}</TableCell>
+                        <TableCell align="center">{`${row.addressOne}, ${row.addressTwo}`}</TableCell>
+                        <TableCell align="center">{row.phoneNumber}</TableCell>
                         <TableCell align="center">
-                          {moment(row.createdAt).format("DD/MM/YYYY")}
+                          {moment(row.joinDate).format("DD/MM/YYYY")}
                         </TableCell>
                         <TableCell align="center">
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/customers/${row.id}`}
+                            href={`/app/customers/${row.ID}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View
@@ -256,7 +199,7 @@ const CustomerListResults = ({ customers, ...rest }) => {
         </PerfectScrollbar>
         <TablePagination
           component="div"
-          count={customerData.length}
+          count={customers.length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

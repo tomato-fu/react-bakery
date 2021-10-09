@@ -18,7 +18,12 @@ import {
 import IngredientsListToolbar from "./IngredientsListToolbar";
 import IngredientsListHeader from "./IngredientsListHeader";
 
-const IngredientsListResults = ({ ingredients, ...rest }) => {
+const IngredientsListResults = ({
+  ingredients,
+  update,
+  setUpdate,
+  setIngredients,
+}) => {
   const [selectIngredientID, setSelectIngredientID] = useState([]);
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
@@ -57,7 +62,7 @@ const IngredientsListResults = ({ ingredients, ...rest }) => {
     let newSelectedIngredientID;
 
     if (event.target.checked) {
-      newSelectedIngredientID = ingredients.map((ingredient) => ingredient.id);
+      newSelectedIngredientID = ingredients.map((ingredient) => ingredient.ID);
     } else {
       newSelectedIngredientID = [];
     }
@@ -112,9 +117,17 @@ const IngredientsListResults = ({ ingredients, ...rest }) => {
   return (
     <Container maxWidth={false}>
       <Box>
-        <IngredientsListToolbar numSelected={selectIngredientID.length} />
+        <IngredientsListToolbar
+          numSelected={selectIngredientID.length}
+          selectedIds={selectIngredientID}
+          setSelectedIds={setSelectIngredientID}
+          ingredients={ingredients}
+          setIngredients={setIngredients}
+          update={update}
+          setUpdate={setUpdate}
+        />
       </Box>
-      <Card {...rest}>
+      <Card>
         <PerfectScrollbar>
           <Box sx={{ minWidth: 1050 }}>
             <Table>
@@ -130,17 +143,17 @@ const IngredientsListResults = ({ ingredients, ...rest }) => {
                 {stableSort(ingredients, getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
+                    const isItemSelected = isSelected(row.ID);
                     const labelId = `enhanced-table-checkbox-${index}`;
 
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleSelectOne(event, row.id)}
+                        onClick={(event) => handleSelectOne(event, row.ID)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.id}
+                        key={row.ID}
                         selected={isItemSelected}
                       >
                         <TableCell padding="checkbox">
@@ -159,15 +172,15 @@ const IngredientsListResults = ({ ingredients, ...rest }) => {
                           padding="none"
                           align="center"
                         >
-                          {row.name}
+                          {row.Name}
                         </TableCell>
-                        <TableCell align="center">{row.price}</TableCell>
-                        <TableCell align="center">{row.comment}</TableCell>
+                        <TableCell align="center">{row.PricePerKG}</TableCell>
+                        <TableCell align="center">{row.Note}</TableCell>
                         <TableCell align="center">
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/ingredients/${row.id}`}
+                            href={`/app/ingredients/${row.ID}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View

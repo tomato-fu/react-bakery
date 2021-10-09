@@ -129,11 +129,11 @@ const OrdersListResults = ({ orders, ...rest }) => {
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleSelectOne(event, row.id)}
+                        onClick={(event) => handleSelectOne(event, row.orderID)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.id}
+                        key={row.orderID}
                         selected={isItemSelected}
                       >
                         <TableCell padding="checkbox">

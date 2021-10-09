@@ -19,20 +19,31 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import PushPinIcon from "@mui/icons-material/PushPin";
-const ProductCard = ({ product, removeProduct, pinProduct }) => {
+import axios from "axios";
+const ProductCard = ({ product, update, setUpdate, setShowDelete }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [showPin, setShowPin] = useState(product.isPin);
+  // const [showPin, setShowPin] = useState(product.isPin);
   const open = Boolean(anchorEl);
-
+  console.log(product);
   const handleRemove = (id) => {
-    removeProduct(id);
+    axios
+      .delete("http://localhost:3004/products/deleteProduct", {
+        params: {
+          productID: id,
+        },
+      })
+      .then(() => {
+        setUpdate(!update);
+      })
+      .catch((err) => console.log(err));
     setAnchorEl(null);
+    setShowDelete(true);
   };
-  const handlePin = (id) => {
-    pinProduct(id);
-    setAnchorEl(null);
-    setShowPin(!showPin);
-  };
+  // const handlePin = (id) => {
+  //   pinProduct(id);
+  //   setAnchorEl(null);
+  //   setShowPin(!showPin);
+  // };
 
   return (
     <Card
@@ -43,11 +54,11 @@ const ProductCard = ({ product, removeProduct, pinProduct }) => {
         position: "relative",
       }}
     >
-      {showPin && (
+      {/* {showPin && (
         <PushPinIcon
           style={{ position: "absolute", left: "1rem", top: "0.8rem" }}
         />
-      )}
+      )} */}
 
       <Box sx={{ position: "absolute", right: "1rem", top: "0.8rem" }}>
         <IconButton
@@ -74,15 +85,20 @@ const ProductCard = ({ product, removeProduct, pinProduct }) => {
             },
           }}
         >
-          <MenuItem key="pin" onClick={() => handlePin(product.id)}>
+          {/* <MenuItem key="pin" onClick={() => handlePin(product.id)}>
             {showPin ? "Unpin" : "Pin"}
           </MenuItem>
-          <MenuItem key="remove" onClick={() => handleRemove(product.id)}>
+        */}
+          <MenuItem
+            key="remove"
+            onClick={() => handleRemove(product.ID)}
+            sx={{ color: "#f44336" }}
+          >
             Remove
           </MenuItem>
         </Menu>
       </Box>
-      <CardContent component={Link} to={`/app/products/${product.id}`}>
+      <CardContent component={Link} to={`/app/products/${product.ID}`}>
         <Box
           sx={{
             display: "flex",
@@ -90,7 +106,11 @@ const ProductCard = ({ product, removeProduct, pinProduct }) => {
             pb: 3,
           }}
         >
-          <Avatar alt="Product" src={product.media} variant="square" />
+          <Avatar
+            alt="Product"
+            src="/static/images/croissant.png"
+            variant="square"
+          />
         </Box>
         <Typography
           align="center"
@@ -98,10 +118,10 @@ const ProductCard = ({ product, removeProduct, pinProduct }) => {
           gutterBottom
           variant="h4"
         >
-          {product.title}
+          {product.Name}
         </Typography>
         <Typography align="center" color="textPrimary" variant="body1">
-          {product.description}
+          {product.Comment}
         </Typography>
       </CardContent>
       <Box sx={{ flexGrow: 1 }} />
@@ -115,7 +135,7 @@ const ProductCard = ({ product, removeProduct, pinProduct }) => {
               display: "flex",
             }}
           >
-            {product.isFire ? (
+            {/* {product.isFire ? (
               <Box
                 sx={{
                   display: "flex",
@@ -144,7 +164,7 @@ const ProductCard = ({ product, removeProduct, pinProduct }) => {
                   Updated 2hr ago
                 </Typography>
               </Box>
-            )}
+            )} */}
           </Grid>
           <Grid
             item
@@ -160,7 +180,7 @@ const ProductCard = ({ product, removeProduct, pinProduct }) => {
               sx={{ pl: 1 }}
               variant="body2"
             >
-              {product.totalDownloads} Orders
+              123 Orders
             </Typography>
           </Grid>
         </Grid>

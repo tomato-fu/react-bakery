@@ -90,7 +90,7 @@ function OrdersListHeader(props) {
           <TableCell
             key={headCell.id}
             align={"center"}
-            padding={headCell.disablePadding ? "none" : "normal"}
+            padding={headCell.disablePadding ? "none" : "default"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel

@@ -81,7 +81,7 @@ const CustomerOrdersResult = () => {
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={row.orderID}>
                         <TableCell
                           component="th"
                           scope="row"
@@ -127,10 +127,6 @@ const CustomerOrdersResult = () => {
       </Card>
     </Container>
   );
-};
-
-CustomerOrdersResult.propTypes = {
-  customers: PropTypes.array.isRequired,
 };
 
 export default CustomerOrdersResult;

@@ -15,22 +15,24 @@ import IconButton from "@material-ui/core/IconButton";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import "date-fns";
-
+import DialogContentText from "@mui/material/DialogContentText";
 import { withStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 import MuiDialogActions from "@material-ui/core/DialogActions";
-
+import { Alert } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import DateFnsUtils from "@date-io/date-fns";
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
-import React, { useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import axios from "axios";
 
 import { Search as SearchIcon } from "react-feather";
 
@@ -85,8 +87,21 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 const IngredientsListToolbar = (props) => {
-  const { numSelected } = props;
+  const {
+    numSelected,
+    selectedIds,
+    ingredients,
+    setIngredients,
+    update,
+    setUpdate,
+    setSelectedIds,
+  } = props;
   const [open, setOpen] = React.useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [disable, setDisable] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       ingredientName: "",
@@ -94,10 +109,56 @@ const IngredientsListToolbar = (props) => {
       comment: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+    onSubmit: () => {
+      setDisable(true);
+      axios
+        .post("http://localhost:3004/ingredients/CreateIngredient", {
+          name: formik.values.ingredientName,
+          price: formik.values.price,
+          note: formik.values.comment,
+        })
+        .then(() => {
+          setDisable(false);
+          setShowSuccess(true);
+          setUpdate(!update);
+          formik.resetForm();
+        })
+        .catch(() => console.log("error"));
     },
   });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [ingredients]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowDelete(false);
+    }, 3000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [ingredients]);
+
+  const deleteIngredients = () => {
+    axios
+      .delete("http://localhost:3004/ingredients/deleteIngredients", {
+        params: {
+          deleteIDs: selectedIds,
+        },
+      })
+      .then(() => {
+        console.log("delete successfully");
+        setUpdate(!update);
+        setSelectedIds([]);
+      })
+      .catch((err) => console.log(err));
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -108,6 +169,7 @@ const IngredientsListToolbar = (props) => {
   return (
     <Box sx={{ mb: 3 }}>
       <Box sx={{}}>
+        {showDelete && <Alert severity="success">Delete successfully!</Alert>}
         <Toolbar
           sx={{
             pl: { sm: 2 },
@@ -134,7 +196,11 @@ const IngredientsListToolbar = (props) => {
 
           {numSelected > 0 ? (
             <Tooltip title="Delete">
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  setOpenDelete(true);
+                }}
+              >
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
@@ -156,6 +222,35 @@ const IngredientsListToolbar = (props) => {
             </Box>
           )}
         </Toolbar>
+        <Dialog
+          open={openDelete}
+          onClose={() => setOpenDelete(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Warning, this operation cannot be reversed!"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete those data? Once you press "yes",
+              it cannot be restored.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                deleteIngredients();
+                setOpenDelete(false);
+                setShowDelete(true);
+              }}
+              style={{ color: "#f44336" }}
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
 
       <Box sx={{ mt: 3 }}>
@@ -292,7 +387,6 @@ const IngredientsListToolbar = (props) => {
                   id="comment"
                   fullWidth
                   rows={5}
-                  maxRows={10}
                   label="Note"
                   multiline
                   variant="outlined"
@@ -308,10 +402,34 @@ const IngredientsListToolbar = (props) => {
                 color="primary"
                 variant="contained"
                 type="submit"
+                disabled={disable ? true : false}
                 style={{ margin: "2rem auto", display: "block", width: "50vw" }}
               >
                 Submit
               </Button>
+              <div
+                style={{
+                  width: "90vw",
+                  margin: "0 auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+
+                  padding: "2rem",
+                  borderRadius: "5px",
+                  background: "#fff",
+                  shadows: " 0 2px 10px rgb(0 0 0 / 30%)",
+                }}
+              >
+                {disable && (
+                  <CircularProgress sx={{ position: "fixed", top: 0 }} />
+                )}
+                {showSuccess && (
+                  <Alert severity="success" sx={{ position: "fixed", top: 0 }}>
+                    Create a new ingredient successfully!
+                  </Alert>
+                )}
+              </div>
             </form>
           </DialogContent>
         </Dialog>

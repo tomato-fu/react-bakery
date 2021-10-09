@@ -21,10 +21,10 @@ const headCells = [
     label: "Name",
   },
   {
-    id: "email",
+    id: "wechatID",
     numeric: false,
     disablePadding: false,
-    label: "Email",
+    label: "WeChatID",
   },
   {
     id: "location",
@@ -42,7 +42,7 @@ const headCells = [
     id: "createdAt",
     numeric: false,
     disablePadding: false,
-    label: "Date",
+    label: "Join Date",
   },
   {
     id: "view",
@@ -83,7 +83,7 @@ function CustomerListHeader(props) {
           <TableCell
             key={headCell.id}
             align={"center"}
-            padding={headCell.disablePadding ? "none" : "normal"}
+            padding={headCell.disablePadding ? "none" : "default"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel

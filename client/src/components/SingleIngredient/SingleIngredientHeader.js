@@ -10,17 +10,19 @@ import {
   CardHeader,
 } from "@material-ui/core";
 
-import { useParams } from "react-router";
 import EcoIcon from "@material-ui/icons/Eco";
 import { blue } from "@material-ui/core/colors";
 
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
-import AlarmOnIcon from "@material-ui/icons/AlarmOn";
-import AddAlarmIcon from "@material-ui/icons/AddAlarm";
-import LocationOnIcon from "@material-ui/icons/LocationOn";
-import DoneIcon from "@material-ui/icons/Done";
-const SingleIngredientHeader = () => {
-  const { ingredientID } = useParams();
+import { useSingleIngredientFetch } from "src/hooks/useSingleIngredientFetch";
+const SingleIngredientHeader = (ingredientID) => {
+  const {
+    state: ingredient,
+    loading,
+    error,
+  } = useSingleIngredientFetch(ingredientID);
+
+  const { Name, PricePerKG } = ingredient;
   return (
     <Card sx={{ height: "100%" }}>
       <CardHeader title="Ingredient Info" />
@@ -37,7 +39,7 @@ const SingleIngredientHeader = () => {
             </Typography>
             <Typography color="textSecondary" variant="h5">
               <a href="/app/products/1" style={{ color: "#6b778c" }}>
-                Milk
+                {Name}
               </a>
             </Typography>
           </Grid>
@@ -64,7 +66,7 @@ const SingleIngredientHeader = () => {
               Price/KG
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              $2.45
+              {`$${PricePerKG}`}
             </Typography>
           </Grid>
           <Grid item>

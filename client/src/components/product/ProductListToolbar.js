@@ -9,9 +9,7 @@ import {
   Grid,
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import lime from "@material-ui/core/colors/lime";
-import { createMuiTheme } from "@material-ui/core";
-import { ThemeProvider } from "@material-ui/styles";
+
 import "date-fns";
 import Toolbar from "@material-ui/core/Toolbar";
 import { Search as SearchIcon } from "react-feather";
@@ -23,13 +21,17 @@ import MuiDialogActions from "@material-ui/core/DialogActions";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FieldArray, Formik, getIn } from "formik";
 import * as yup from "yup";
 import DeleteIcon from "@mui/icons-material/Delete";
 import red from "@material-ui/core/colors/red";
 import MenuItem from "@mui/material/MenuItem";
-
+import CircularProgress from "@mui/material/CircularProgress";
+import DialogContentText from "@mui/material/DialogContentText";
+import Alert from "@mui/material/Alert";
+import axios from "axios";
+import { useIngredientsFetch } from "src/hooks/useIngredientsFetch";
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -37,35 +39,22 @@ const styles = (theme) => ({
   },
 });
 
-const ingredients = [
-  {
-    value: "Milk",
-    label: "Milk",
-  },
-  {
-    value: "Sugar",
-    label: "Sugar",
-  },
-  {
-    value: "Flour",
-    label: "Flour",
-  },
-  {
-    value: "Coco",
-    label: "Coco",
-  },
-];
-
 const validationSchema = yup.object({
   productName: yup.string("Enter product name").required(),
-  price: yup.number().required(),
+  price: yup
+    .number()
+    .required("Please enter price")
+    .moreThan(0, "Please enter a valid price"),
   foodCost: yup.number(),
   timeCost: yup.number(),
   comment: yup.string("Enter comment for customer"),
   ingredients: yup.array().of(
     yup.object({
       name: yup.string().required("Please select an ingredient"),
-      mass: yup.number().required(),
+      mass: yup
+        .number("Please enter a valid number")
+        .required()
+        .moreThan(0, "Grams must be more than 0"),
     })
   ),
 });
@@ -101,27 +90,31 @@ const DialogContent = withStyles((theme) => ({
 }))(MuiDialogContent);
 
 const ProductListToolbar = (props) => {
-  const [open, setOpen] = React.useState(false);
-  // const [ingredient, setIngredient] = React.useState("");
-  // const [number, setNumber] = useState(0);
+  const [open, setOpen] = useState(false);
+  const { products, setProducts, update, setUpdate } = props;
 
-  // const handleChange = (event) => {
-  //   setIngredient(event.target.value);
-  // };
-  // const formik = useFormik({
-  //   initialValues: {
-  //     productName: "",
-  //     price: 0,
-  //     foodCost: 0,
-  //     timeCost: 0,
-  //     comment: "",
-  //     ingredients: [],
-  //   },
-  //   validationSchema: validationSchema,
-  //   onSubmit: (values) => {
-  //     alert(JSON.stringify(values, null, 2));
-  //   },
-  // });
+  const [openDelete, setOpenDelete] = useState(false);
+  const [disable, setDisable] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const { state: ingredients } = useIngredientsFetch();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [products]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowDelete(false);
+    }, 3000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [products]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -208,7 +201,55 @@ const ProductListToolbar = (props) => {
               }}
               validationSchema={validationSchema}
               onSubmit={(values) => {
-                alert(JSON.stringify(values, null, 2));
+                setDisable(true);
+                //calculate the foodCost
+
+                if (values.foodCost === 0) {
+                  values.ingredients.map((item) => {
+                    ingredients.map((ingredient) => {
+                      if (item.name == ingredient.ID) {
+                        values.foodCost +=
+                          (item.mass * ingredient.PricePerKG) / 1000;
+                      }
+                    });
+                  });
+                }
+
+                axios
+                  .post("http://localhost:3004/products/createProduct", {
+                    productName: values.productName,
+                    price: values.price,
+                    foodCost: values.foodCost,
+                    timeCost: values.timeCost,
+                    comment: values.comment,
+                  })
+                  .then((res) => {
+                    const productID = res.data;
+                    axios
+                      .post("http://localhost:3004/recipes/createRecipe", {
+                        productID: productID,
+                        comment: values.comment,
+                      })
+                      .then(() => {
+                        values.ingredients.map((ingredient) => {
+                          axios.post(
+                            "http://localhost:3004/recipes/createRecipeIngredient",
+                            {
+                              recipeID: productID,
+                              ingredientID: ingredient.name,
+                              grams: ingredient.mass,
+                            }
+                          );
+                        });
+                      });
+                  })
+                  .then(() => {
+                    setDisable(false);
+                    setShowSuccess(true);
+
+                    setUpdate(!update);
+                  })
+                  .catch(() => console.log("error"));
               }}
             >
               {(formik) => (
@@ -274,6 +315,7 @@ const ProductListToolbar = (props) => {
                           type="number"
                           label="Product Price"
                           variant="standard"
+                          placeholder="Product Price"
                           value={formik.values.price}
                           onChange={formik.handleChange}
                           error={
@@ -365,7 +407,6 @@ const ProductListToolbar = (props) => {
                       id="comment"
                       fullWidth
                       rows={5}
-                      maxRows={10}
                       label="Comment"
                       multiline
                       variant="outlined"
@@ -402,9 +443,8 @@ const ProductListToolbar = (props) => {
                             style={{ maxWidth: "10rem" }}
                             onClick={() =>
                               arrayHelpers.push({
-                                name: "",
+                                name: "", //This is the ID of ingredient
                                 mass: 0,
-                                id: Math.random(),
                               })
                             }
                             style={{ marginBottom: "0.5rem" }}
@@ -417,7 +457,7 @@ const ProductListToolbar = (props) => {
                             const touchedName = getIn(formik.touched, name);
                             const errorName = getIn(formik.errors, name);
                             const mass = `ingredients[${index}].mass`;
-                            const touchedMass = getIn(formik.touch, mass);
+                            const touchedMass = getIn(formik.touched, mass);
                             const errorMass = getIn(formik.errors, mass);
                             return (
                               <Grid container spacing={3} key={index}>
@@ -438,10 +478,10 @@ const ProductListToolbar = (props) => {
                                   >
                                     {ingredients.map((option) => (
                                       <MenuItem
-                                        key={option.value}
-                                        value={option.value}
+                                        key={option.ID}
+                                        value={option.ID}
                                       >
-                                        {option.label}
+                                        {option.Name}
                                       </MenuItem>
                                     ))}
                                   </TextField>
@@ -457,9 +497,15 @@ const ProductListToolbar = (props) => {
                                     <TextField
                                       type="number"
                                       value={item.mass}
+                                      helperText={
+                                        touchedMass && errorMass
+                                          ? errorMass
+                                          : ""
+                                      }
+                                      error={Boolean(touchedMass && errorMass)}
                                       fullWidth
                                       name={mass}
-                                      label="Mass"
+                                      label="Grams"
                                       variant="standard"
                                       onChange={formik.handleChange}
                                     />
@@ -492,6 +538,33 @@ const ProductListToolbar = (props) => {
                   >
                     Submit
                   </Button>
+
+                  <div
+                    style={{
+                      width: "90vw",
+                      margin: "0 auto",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+
+                      padding: "2rem",
+                      borderRadius: "5px",
+                      background: "#fff",
+                      shadows: " 0 2px 10px rgb(0 0 0 / 30%)",
+                    }}
+                  >
+                    {disable && (
+                      <CircularProgress sx={{ position: "fixed", top: 0 }} />
+                    )}
+                    {showSuccess && (
+                      <Alert
+                        severity="success"
+                        sx={{ position: "fixed", top: 0 }}
+                      >
+                        Create a new ingredient successfully!
+                      </Alert>
+                    )}
+                  </div>
                 </form>
               )}
             </Formik>

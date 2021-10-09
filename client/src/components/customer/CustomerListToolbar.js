@@ -15,24 +15,26 @@ import IconButton from "@material-ui/core/IconButton";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import "date-fns";
-
 import { withStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
+import CircularProgress from "@mui/material/CircularProgress";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 import MuiDialogActions from "@material-ui/core/DialogActions";
-
+import DialogContentText from "@mui/material/DialogContentText";
+import moment from "moment";
 import CloseIcon from "@material-ui/icons/Close";
 import DateFnsUtils from "@date-io/date-fns";
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-
 import { Search as SearchIcon } from "react-feather";
+import Alert from "@mui/material/Alert";
+import axios from "axios";
 
 const styles = (theme) => ({
   root: {
@@ -42,14 +44,18 @@ const styles = (theme) => ({
 });
 
 const validationSchema = yup.object({
-  customerName: yup.string("Enter customer name"),
-  weChatID: yup.string("Enter Wechat ID"),
+  customerName: yup
+    .string("Enter customer name")
+    .required("Please enter customer name"),
+  weChatID: yup.string("Enter Wechat ID").required("Please enter wechat ID"),
   phoneNumber: yup.string("Enter phone number"),
-  joinDate: yup.date("Enter join date"),
-  addressOne: yup.string("Enter address line one"),
+  joinDate: yup.date("Enter join date").required("Please enter join date"),
+  addressOne: yup
+    .string("Enter address line one")
+    .required("Please enter address"),
   addressTwo: yup.string("Enter address line two"),
   city: yup.string("Enter city"),
-  zipCode: yup.number("Enter Zip Code"),
+  zipCode: yup.string("Enter Zip Code"),
   comment: yup.string("Enter comment for customer"),
 });
 
@@ -91,14 +97,27 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 const CustomerListToolbar = (props) => {
-  const { numSelected, customers, setCustomers } = props;
-  const [open, setOpen] = React.useState(false);
+  const {
+    numSelected,
+    selectedIds,
+    customers,
+    setCustomers,
+    update,
+    setUpdate,
+    setSelectedIds,
+  } = props;
+  const [open, setOpen] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [disable, setDisable] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       customerName: "",
       weChatID: "",
       phoneNumber: "",
-      joinDate: null,
+      joinDate: new Date(),
       addressOne: "",
       addressTwo: "",
       city: "",
@@ -106,10 +125,61 @@ const CustomerListToolbar = (props) => {
       comment: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+    onSubmit: () => {
+      setDisable(true);
+      axios
+        .post("http://localhost:3004/customers/createCustomer", {
+          customerName: formik.values.customerName,
+          wechatID: formik.values.weChatID,
+          phoneNumber: formik.values.phoneNumber,
+          joinDate: moment(formik.values.joinDate).format("YYYY-MM-DD"),
+          addressOne: formik.values.addressOne,
+          addressTwo: formik.values.addressTwo,
+          city: formik.values.city,
+          zip: formik.values.zipCode,
+          comment: formik.values.comment,
+        })
+        .then(() => {
+          setDisable(false);
+          setShowSuccess(true);
+          setUpdate(!update);
+        })
+        .catch(() => console.log("error"));
     },
   });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [customers]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowDelete(false);
+    }, 3000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [customers]);
+
+  const deleteCustomers = () => {
+    axios
+      .delete("http://localhost:3004/customers/deleteCustomers", {
+        params: {
+          deleteIDs: selectedIds,
+        },
+      })
+      .then(() => {
+        console.log("delete successfully");
+        setUpdate(!update);
+        setSelectedIds([]);
+      })
+      .catch((err) => console.log(err));
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -120,6 +190,7 @@ const CustomerListToolbar = (props) => {
   return (
     <Box sx={{ mb: 3 }}>
       <Box sx={{}}>
+        {showDelete && <Alert severity="success">Delete successfully!</Alert>}
         <Toolbar
           sx={{
             pl: { sm: 2 },
@@ -146,7 +217,11 @@ const CustomerListToolbar = (props) => {
 
           {numSelected > 0 ? (
             <Tooltip title="Delete">
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  setOpenDelete(true);
+                }}
+              >
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
@@ -168,6 +243,36 @@ const CustomerListToolbar = (props) => {
             </Box>
           )}
         </Toolbar>
+
+        <Dialog
+          open={openDelete}
+          onClose={() => setOpenDelete(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Warning, this operation cannot be reversed!"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete those data? Once you press "yes",
+              it cannot be restored.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                deleteCustomers();
+                setOpenDelete(false);
+                setShowDelete(true);
+              }}
+              style={{ color: "#f44336" }}
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
 
       <Box sx={{ mt: 3 }}>
@@ -344,6 +449,13 @@ const CustomerListToolbar = (props) => {
                         id="joinDate"
                         label="Join Date"
                         format="MM/dd/yyyy"
+                        error={
+                          formik.touched.joinDate &&
+                          Boolean(formik.errors.joinDate)
+                        }
+                        helperText={
+                          formik.touched.joinDate && formik.errors.joinDate
+                        }
                         value={formik.values.joinDate}
                         onChange={(value) =>
                           formik.setFieldValue("joinDate", value)
@@ -498,7 +610,6 @@ const CustomerListToolbar = (props) => {
                   id="comment"
                   fullWidth
                   rows={5}
-                  maxRows={10}
                   label="Comment"
                   multiline
                   variant="outlined"
@@ -514,10 +625,34 @@ const CustomerListToolbar = (props) => {
                 color="primary"
                 variant="contained"
                 type="submit"
+                disabled={disable ? true : false}
                 style={{ margin: "2rem auto", display: "block", width: "50vw" }}
               >
                 Submit
               </Button>
+              <div
+                style={{
+                  width: "90vw",
+                  margin: "0 auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+
+                  padding: "2rem",
+                  borderRadius: "5px",
+                  background: "#fff",
+                  shadows: " 0 2px 10px rgb(0 0 0 / 30%)",
+                }}
+              >
+                {disable && (
+                  <CircularProgress sx={{ position: "fixed", top: 0 }} />
+                )}
+                {showSuccess && (
+                  <Alert severity="success" sx={{ position: "fixed", top: 0 }}>
+                    Create a new customer successfully!
+                  </Alert>
+                )}
+              </div>
             </form>
           </DialogContent>
         </Dialog>

@@ -19,7 +19,7 @@ CREATE TABLE Customer(
     zip               VARCHAR(10),
     Comment           VARCHAR(1024),
     PRIMARY KEY (ID)
-);
+)Engine=InnoDB;
 
 
 
@@ -33,8 +33,11 @@ CREATE TABLE `Order`(
     Fulfilled         INT NOT NULL,
     Comment           VARCHAR(2048),
     PRIMARY KEY (ID),
-    FOREIGN KEY (Customer_ID) REFERENCES Customer(ID)
-);
+    FOREIGN KEY (Customer_ID) REFERENCES Customer(ID) 
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+    
+)Engine=InnoDB;
 
 
 
@@ -44,7 +47,7 @@ CREATE TABLE Payment_Type(
     ID                INT UNSIGNED NOT NULL AUTO_INCREMENT,
     Type              VARCHAR(16) NOT NULL,
     PRIMARY KEY (ID)
-);
+)Engine=InnoDB;
 
 INSERT INTO Payment_Type(Type)
     VALUES 
@@ -59,9 +62,13 @@ CREATE TABLE Payment(
     Payment_Type_ID   INT UNSIGNED NOT NULL,
     Amount            DECIMAL(8,2) NOT NULL,
     PRIMARY KEY (order_id),
-    FOREIGN KEY (order_id) REFERENCES `Order`(ID),
+    FOREIGN KEY (order_id) REFERENCES `Order`(ID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (Payment_Type_ID) REFERENCES Payment_Type(ID)
-);
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+)Engine=InnoDB;
 
 
 -- DROP TABLE Product;
@@ -72,8 +79,9 @@ CREATE TABLE Product(
     Price             DECIMAL(6,2) NOT NULL,
     FoodCost          DECIMAL(6,2),
     TimeCost          INT,
+    Comment           VARCHAR(1024),
     PRIMARY KEY(ID)
-);
+)Engine=InnoDB;
 
 
 
@@ -87,9 +95,13 @@ CREATE TABLE Order_Details(
     Quantity          INT NOT NULL,
     Comment           VARCHAR(1024),
     PRIMARY KEY (order_id, product_id),
-    FOREIGN KEY (order_id) REFERENCES `Order`(ID),
+    FOREIGN KEY (order_id) REFERENCES `Order`(ID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (product_id) REFERENCES Product(ID)
-);
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+)Engine=InnoDB;
 
 
 
@@ -100,7 +112,7 @@ CREATE TABLE Sales_Report(
     Date              DATE NOT NULL UNIQUE,
     Comment           VARCHAR(8048),
     PRIMARY KEY (ID)
-);
+)Engine=InnoDB;
 
 -- DROP TABLE Sales_Report_Details;
 
@@ -113,9 +125,13 @@ CREATE TABLE Sales_Report_Details(
     PriceAtSale       DECIMAL(6,2) NOT NULL,
     FoodCostAtSale    DECIMAL(6,2) NOT NULL,
     PRIMARY KEY (Sales_Report_ID, product_id),
-    FOREIGN KEY (Sales_Report_ID) REFERENCES Sales_Report(ID),
+    FOREIGN KEY (Sales_Report_ID) REFERENCES Sales_Report(ID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (product_id) REFERENCES Product(ID)
-);
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+)Engine=InnoDB;
 
 
 
@@ -123,11 +139,13 @@ CREATE TABLE Sales_Report_Details(
 
 CREATE TABLE Recipe(
     product_id        INT UNSIGNED NOT NULL,
-    ItemsProduced     INT NOT NULL,
     Comment           VARCHAR(10000),
     PRIMARY KEY (product_id),
     FOREIGN KEY (product_id) REFERENCES Product(ID)
-);
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+
+)Engine=InnoDB;
 
 
 -- DROP TABLE Ingredient;
@@ -136,8 +154,9 @@ CREATE TABLE Ingredient(
     ID                INT UNSIGNED NOT NULL AUTO_INCREMENT,
     Name              VARCHAR(50),
     PricePerKG        DECIMAL(8,2),
+    Note              VARCHAR(512),
     PRIMARY KEY(ID)
-);
+)Engine=InnoDB;
 
 
 
@@ -148,9 +167,14 @@ CREATE TABLE Recipe_Ingredient(
     Ingredient_ID     INT UNSIGNED NOT NULL,
     Grams             INT UNSIGNED NOT NULL,
     PRIMARY KEY (Recipe_ID, Ingredient_ID),
-    FOREIGN KEY (Recipe_ID) REFERENCES Recipe(product_id),
+    FOREIGN KEY (Recipe_ID) REFERENCES Recipe(product_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (Ingredient_ID) REFERENCES Ingredient(ID)
-);
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+
+)Engine=InnoDB;
 
 
 
@@ -264,6 +288,13 @@ BEGIN
     WHERE ID = cust_id;
 END &&
 
+CREATE PROCEDURE fetch_ingredient_info(IN Ingredient_ID INT)
+BEGIN
+	SELECT *
+    FROM Ingredient
+    WHERE ID = Ingredient_ID;
+END &&
+
 CREATE PROCEDURE fetch_ingredient_products(IN ing_id INT)
 BEGIN
 SELECT p.ID, p.Name, p.price, p.FoodCost, p.TimeCost, ri.grams, r.ItemsProduced
@@ -331,7 +362,7 @@ END &&
 
 CREATE PROCEDURE fetch_single_product(IN id INT)
 BEGIN
-    SELECT p.Price, p.FoodCost
+    SELECT *
     FROM product p
     WHERE p.ID = id;
 END&&

@@ -9,17 +9,32 @@ import {
   Divider,
   CardHeader,
 } from "@material-ui/core";
-
-import { useParams } from "react-router";
-import EmailIcon from "@material-ui/icons/Email";
+import moment from "moment";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import { blue } from "@material-ui/core/colors";
 import PhoneIcon from "@material-ui/icons/Phone";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
+import { useSingleCustomerFetch } from "src/hooks/useSingleCustomerFetch";
+const SingleCustomerHeader = (customerID) => {
+  const {
+    state: customer,
+    loading,
+    error,
+  } = useSingleCustomerFetch(customerID);
 
-const SingleCustomerHeader = () => {
-  const { customerID } = useParams();
+  const {
+    CustomerName,
+    WeChatID,
+    addressOne,
+    addressTwo,
+    city,
+    joinDate,
+    phoneNumber,
+    zip,
+    comment,
+  } = customer;
   return (
     <Card sx={{ height: "100%" }}>
       <CardHeader title="Customer Info" />
@@ -35,7 +50,7 @@ const SingleCustomerHeader = () => {
               Name:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              Josh Brume
+              {CustomerName}
             </Typography>
           </Grid>
           <Grid item>
@@ -58,10 +73,10 @@ const SingleCustomerHeader = () => {
         >
           <Grid item>
             <Typography color="textPrimary" gutterBottom variant="h3">
-              Email:
+              Wechat:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              Jiang200h@gmail.com
+              {WeChatID}
             </Typography>
           </Grid>
           <Grid item>
@@ -72,7 +87,7 @@ const SingleCustomerHeader = () => {
                 width: 56,
               }}
             >
-              <EmailIcon />
+              <ChatBubbleIcon />
             </Avatar>
           </Grid>
         </Grid>
@@ -87,7 +102,7 @@ const SingleCustomerHeader = () => {
               Location:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              12 Downtown Rd Apt 13B
+              {`${addressOne}, ${addressTwo}, ${city}, ${zip}`}
             </Typography>
           </Grid>
           <Grid item>
@@ -113,7 +128,7 @@ const SingleCustomerHeader = () => {
               Phone:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              012345678
+              {phoneNumber}
             </Typography>
           </Grid>
           <Grid item>
@@ -139,7 +154,7 @@ const SingleCustomerHeader = () => {
               Join Date:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              08/30/2010
+              {moment(joinDate).format("MM/DD/YYYY")}
             </Typography>
           </Grid>
           <Grid item>

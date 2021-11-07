@@ -4,7 +4,7 @@ const cors = require("cors");
 
 app.use(cors());
 app.use(express.json());
-
+const PORT = 3004;
 const customers = require("./routes/customers.js");
 const ingredients = require("./routes/ingredients.js");
 const products = require("./routes/products.js");
@@ -22,6 +22,6 @@ app.use("/orders", orders);
 app.use("/sales", sales);
 app.use("/profits", profits);
 
-app.listen(3004, () => {
+app.listen(process.env.PORT || PORT, () => {
   console.log("running now");
 });

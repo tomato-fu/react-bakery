@@ -1,16 +1,6 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-} from "@material-ui/core";
-import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
-import ArrowUpward from "@material-ui/icons/ArrowUpward";
-import CakeIcon from "@mui/icons-material/Cake";
+import { Avatar, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { blue } from "@material-ui/core/colors";
-import { green } from "@material-ui/core/colors";
+import CakeIcon from "@mui/icons-material/Cake";
 import { useTotalProductQuantityFetch } from "src/hooks/product/useTotalProductQuantityFetch";
 const ProductNumber = (props) => {
   const { state, loading, error } = useTotalProductQuantityFetch();

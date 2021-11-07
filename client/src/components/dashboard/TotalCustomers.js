@@ -1,13 +1,5 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-} from "@material-ui/core";
+import { Avatar, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { green } from "@material-ui/core/colors";
-import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import PeopleIcon from "@material-ui/icons/PeopleOutlined";
 import { useTotalCustomerQuantityFetch } from "src/hooks/customer/useTotalCustomerQuantityFetch";
 const TotalCustomers = (props) => {

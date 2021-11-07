@@ -1,33 +1,21 @@
-import * as React from "react";
-
-import Typography from "@material-ui/core/Typography";
 import {
-  CardContent,
-  Card,
-  Grid,
   Avatar,
-  Divider,
+  Card,
+  CardContent,
   CardHeader,
+  Divider,
+  Grid,
 } from "@material-ui/core";
-
-import { useParams } from "react-router";
-
 import { blue } from "@material-ui/core/colors";
-import AccountCircleIcon from "@material-ui/icons/AccountCircle";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
-import BreakfastDiningIcon from "@mui/icons-material/BreakfastDining";
-import CallToActionIcon from "@mui/icons-material/CallToAction";
-import AlarmOnIcon from "@material-ui/icons/AlarmOn";
-import AddAlarmIcon from "@material-ui/icons/AddAlarm";
-import LocationOnIcon from "@material-ui/icons/LocationOn";
-import DoneIcon from "@material-ui/icons/Done";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import MoneyOffIcon from "@mui/icons-material/MoneyOff";
+import Typography from "@material-ui/core/Typography";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import { Database } from "react-feather";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import moment from "moment";
+import * as React from "react";
+import { Database } from "react-feather";
+
 const SingleStoreHeader = ({ sale }) => {
   return (
     <Card sx={{ height: "100%" }}>

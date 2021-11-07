@@ -1,17 +1,10 @@
-import * as React from "react";
-
 import Box from "@material-ui/core/Box";
-
 import TableCell from "@material-ui/core/TableCell";
-
 import TableHead from "@material-ui/core/TableHead";
-
 import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
-
-import Checkbox from "@material-ui/core/Checkbox";
-
 import { visuallyHidden } from "@material-ui/utils";
+import * as React from "react";
 
 const headCells = [
   {

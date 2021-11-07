@@ -1,16 +1,6 @@
-import {
-  Avatar,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-  Box,
-} from "@material-ui/core";
+import { Avatar, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { indigo } from "@material-ui/core/colors";
-import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
-import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import EcoIcon from "@material-ui/icons/Eco";
-import { red } from "@mui/material/colors";
 import { useTotalIngredientsQuantity } from "src/hooks/ingredient/useTotalIngredientsQuantity";
 const TotalIngredients = (props) => {
   const { state, loading, error } = useTotalIngredientsQuantity();

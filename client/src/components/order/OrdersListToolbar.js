@@ -1,52 +1,45 @@
+import DateFnsUtils from "@date-io/date-fns";
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
-  TextField,
-  InputAdornment,
-  SvgIcon,
+  CircularProgress,
   Grid,
   MenuItem,
+  TextField,
 } from "@material-ui/core";
-import Tooltip from "@material-ui/core/Tooltip";
-import DeleteIcon from "@material-ui/icons/Delete";
-import { alpha } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import "date-fns";
-
-import { withStyles } from "@material-ui/core/styles";
-import Dialog from "@material-ui/core/Dialog";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import MuiDialogContent from "@material-ui/core/DialogContent";
-import MuiDialogActions from "@material-ui/core/DialogActions";
-import DialogContentText from "@mui/material/DialogContentText";
-
 import red from "@material-ui/core/colors/red";
+import Dialog from "@material-ui/core/Dialog";
+import MuiDialogActions from "@material-ui/core/DialogActions";
+import MuiDialogContent from "@material-ui/core/DialogContent";
+import MuiDialogTitle from "@material-ui/core/DialogTitle";
+import IconButton from "@material-ui/core/IconButton";
+import { alpha, withStyles } from "@material-ui/core/styles";
+import Toolbar from "@material-ui/core/Toolbar";
+import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
-import DateFnsUtils from "@date-io/date-fns";
+import DeleteIcon from "@material-ui/icons/Delete";
 import {
-  MuiPickersUtilsProvider,
   KeyboardDatePicker,
   KeyboardDateTimePicker,
+  MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
-import React, { useState, useEffect } from "react";
-import { useFormik, Formik, getIn, FieldArray } from "formik";
-import * as yup from "yup";
-import { useParams } from "react-router";
-import { useNavigate } from "react-router";
-import { Search as SearchIcon } from "react-feather";
+import DialogContentText from "@mui/material/DialogContentText";
+import axios from "axios";
+import "date-fns";
+import { FieldArray, Formik, getIn, useFormik } from "formik";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 import { useCustomersFetch } from "src/hooks/customer/useCutomersFetch";
 import { usePaymentTypeFetch } from "src/hooks/payment/usePaymentTypeFetch";
 import { useProductsFetch } from "src/hooks/product/useProductsFetch";
-import axios from "axios";
-import moment from "moment";
-import { Alert } from "@material-ui/core";
-import { CircularProgress } from "@material-ui/core";
+import * as yup from "yup";
 import SearchBar from "./SearchBar";
-import { usePointsFetch } from "src/hooks/customer/usePointsFetch";
+
 const styles = (theme) => ({
   root: {
     margin: 0,

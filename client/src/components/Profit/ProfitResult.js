@@ -1,23 +1,20 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
-import PerfectScrollbar from "react-perfect-scrollbar";
 import {
-  Button,
   Box,
+  Button,
   Card,
-  Checkbox,
+  Container,
   Table,
   TableBody,
   TableCell,
   TablePagination,
   TableRow,
-  Container,
 } from "@material-ui/core";
-import Chip from "@mui/material/Chip";
+import moment from "moment";
+import { useState } from "react";
+import PerfectScrollbar from "react-perfect-scrollbar";
 import ProfitHeader from "./ProfitHeader";
-import ProfitToolbar from "./ProfitToolbar";
 import ProfitOverview from "./ProfitOverview";
+import ProfitToolbar from "./ProfitToolbar";
 const ProfitResult = ({ profits, setStartDate, setEndDate }) => {
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);

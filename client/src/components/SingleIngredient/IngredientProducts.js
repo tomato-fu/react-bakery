@@ -1,21 +1,18 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
-import PerfectScrollbar from "react-perfect-scrollbar";
 import {
-  Button,
   Box,
+  Button,
   Card,
+  Container,
   Table,
   TableBody,
   TableCell,
   TablePagination,
   TableRow,
-  Container,
 } from "@material-ui/core";
-import IngredientProductsHeader from "./IngredientProductsHeader";
-import ProductsInIngredient from "src/__mocks__/ProductsInIngredient";
+import { useState } from "react";
+import PerfectScrollbar from "react-perfect-scrollbar";
 import { useSingleIngredientProductsFetch } from "src/hooks/ingredient/useSingleIngredientProductsFetch";
+import IngredientProductsHeader from "./IngredientProductsHeader";
 const IngredientProducts = ({ ingredientID }) => {
   const {
     state: products,

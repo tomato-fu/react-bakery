@@ -1,15 +1,14 @@
-import { Helmet } from "react-helmet";
 import { Box, Container, Grid } from "@material-ui/core";
-import ProductNumber from "src/components/dashboard/ProductNumber";
-import LatestOrders from "src/components/dashboard//LatestOrders";
-import LatestProducts from "src/components/dashboard//LatestProducts";
-import Sales from "src/components/dashboard//Sales";
+import { Helmet } from "react-helmet";
 import CurrentOrders from "src/components/dashboard//CurrentOrders";
+import LatestOrders from "src/components/dashboard//LatestOrders";
+import Sales from "src/components/dashboard//Sales";
 import TotalCustomers from "src/components/dashboard//TotalCustomers";
-import TotalIngredients from "src/components/dashboard/TotalIngredients";
+import ProductNumber from "src/components/dashboard/ProductNumber";
 import SalesDistribution from "src/components/dashboard/SalesDistribution";
-
+import TotalIngredients from "src/components/dashboard/TotalIngredients";
 import orders from "src/__mocks__/orders";
+
 const Dashboard = () => (
   <>
     <Helmet>

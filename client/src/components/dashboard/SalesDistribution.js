@@ -1,20 +1,18 @@
-import { Doughnut } from "react-chartjs-2";
 import {
   Box,
   Card,
   CardContent,
   CardHeader,
+  colors,
   Divider,
   Typography,
-  colors,
   useTheme,
 } from "@material-ui/core";
 import LaptopMacIcon from "@material-ui/icons/LaptopMac";
-import PhoneIcon from "@material-ui/icons/Phone";
-import TabletIcon from "@material-ui/icons/Tablet";
 import StoreIcon from "@mui/icons-material/Store";
-import { useTotalSalesQuantityFetch } from "src/hooks/sale/useTotalSalesQuantityFetch";
+import { Doughnut } from "react-chartjs-2";
 import { useTotalOrdersQuantityFetch } from "src/hooks/order/useTotalOrdersQuantityFetch";
+import { useTotalSalesQuantityFetch } from "src/hooks/sale/useTotalSalesQuantityFetch";
 const SalesDistribution = (props) => {
   const theme = useTheme();
   const {

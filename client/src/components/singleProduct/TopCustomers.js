@@ -1,18 +1,6 @@
+import { Box, Card, CardContent, CardHeader, Divider } from "@material-ui/core";
+import React from "react";
 import { HorizontalBar } from "react-chartjs-2";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  useTheme,
-  colors,
-  FormControl,
-  MenuItem,
-  Select,
-} from "@material-ui/core";
-import React, { useState } from "react";
 import { useTopCustomerFetch } from "src/hooks/product/useTopCustomerFetch";
 const TopCustomers = ({ productID }) => {
   const { state: customers, loading, error } = useTopCustomerFetch(productID);

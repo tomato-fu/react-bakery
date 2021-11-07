@@ -1,30 +1,16 @@
-import { useEffect } from "react";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Box, Drawer, Hidden, List } from "@material-ui/core";
 import PropTypes from "prop-types";
+import { useEffect } from "react";
 import {
-  Avatar,
-  Box,
-  Divider,
-  Drawer,
-  Hidden,
-  List,
-  Typography,
-} from "@material-ui/core";
-import {
-  AlertCircle as AlertCircleIcon,
-  BarChart as BarChartIcon,
-  Lock as LockIcon,
-  Settings as SettingsIcon,
-  ShoppingBag as ShoppingBagIcon,
-  User as UserIcon,
-  UserPlus as UserPlusIcon,
-  Users as UsersIcon,
-  Grid,
-  ShoppingCart,
   Activity,
+  BarChart as BarChartIcon,
   Database,
+  Grid,
+  ShoppingBag as ShoppingBagIcon,
+  ShoppingCart,
+  Users as UsersIcon,
 } from "react-feather";
-import TurnedInNotOutlinedIcon from "@mui/icons-material/TurnedInNotOutlined";
+import { useLocation } from "react-router-dom";
 import NavItem from "./NavItem";
 
 const user = {

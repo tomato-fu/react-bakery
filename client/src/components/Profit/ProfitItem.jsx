@@ -1,24 +1,17 @@
 import {
+  Avatar,
   Box,
-  Container,
-  Grid,
-  Typography,
   Card,
   CardContent,
-  Avatar,
+  Grid,
+  Typography,
 } from "@material-ui/core";
+import { green, red } from "@material-ui/core/colors";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import MoneyIcon from "@material-ui/icons/Money";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
-import { red } from "@material-ui/core/colors";
-import { green } from "@material-ui/core/colors";
-import { orange } from "@material-ui/core/colors";
-import { blue } from "@material-ui/core/colors";
 import { grey } from "@mui/material/colors";
-import { Database, LifeBuoy } from "react-feather";
-import React, { useState } from "react";
+import React from "react";
 
 const ProfitItem = ({ item }) => {
   const { name, amount, percent, color, icon } = item;

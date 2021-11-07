@@ -1,20 +1,17 @@
-import { Doughnut } from "react-chartjs-2";
 import {
   Box,
   Card,
   CardContent,
   CardHeader,
+  colors,
   Divider,
   Typography,
-  colors,
   useTheme,
 } from "@material-ui/core";
-
-import LaptopMacIcon from "@material-ui/icons/LaptopMac";
-import StoreIcon from "@material-ui/icons/Store";
+import AccountBalanceWalletIcon from "@material-ui/icons/AccountBalanceWallet";
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
 import LocalPizzaIcon from "@material-ui/icons/LocalPizza";
-import AccountBalanceWalletIcon from "@material-ui/icons/AccountBalanceWallet";
+import { Doughnut } from "react-chartjs-2";
 
 const Payment = ({ payment }) => {
   const amounts = Array.from(payment).map((item) => item.Amount);

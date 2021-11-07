@@ -1,37 +1,26 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  TextField,
-  InputAdornment,
-  SvgIcon,
-  Divider,
-  Grid,
-} from "@material-ui/core";
+import { Box, Grid, TextField } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-
-import "date-fns";
-import Toolbar from "@material-ui/core/Toolbar";
-import { Search as SearchIcon } from "react-feather";
-import { withStyles } from "@material-ui/core/styles";
-import Dialog from "@material-ui/core/Dialog";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import MuiDialogContent from "@material-ui/core/DialogContent";
-import MuiDialogActions from "@material-ui/core/DialogActions";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Typography from "@material-ui/core/Typography";
-import React, { useState, useEffect } from "react";
-import { FieldArray, Formik, getIn } from "formik";
-import * as yup from "yup";
-import DeleteIcon from "@mui/icons-material/Delete";
 import red from "@material-ui/core/colors/red";
-import MenuItem from "@mui/material/MenuItem";
-import CircularProgress from "@mui/material/CircularProgress";
-import SearchBar from "./SearchBar";
+import Dialog from "@material-ui/core/Dialog";
+import MuiDialogContent from "@material-ui/core/DialogContent";
+import MuiDialogTitle from "@material-ui/core/DialogTitle";
+import IconButton from "@material-ui/core/IconButton";
+import { withStyles } from "@material-ui/core/styles";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+import CloseIcon from "@material-ui/icons/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Alert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
+import MenuItem from "@mui/material/MenuItem";
 import axios from "axios";
+import "date-fns";
+import { FieldArray, Formik, getIn } from "formik";
+import React, { useEffect, useState } from "react";
 import { useIngredientsFetch } from "src/hooks/ingredient/useIngredientsFetch";
+import * as yup from "yup";
+import SearchBar from "./SearchBar";
+
 const styles = (theme) => ({
   root: {
     margin: 0,

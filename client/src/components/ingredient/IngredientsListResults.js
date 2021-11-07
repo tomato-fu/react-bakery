@@ -1,22 +1,20 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
-import PerfectScrollbar from "react-perfect-scrollbar";
 import {
-  Button,
   Box,
+  Button,
   Card,
   Checkbox,
+  Container,
   Table,
   TableBody,
   TableCell,
   TablePagination,
   TableRow,
-  Container,
 } from "@material-ui/core";
-
-import IngredientsListToolbar from "./IngredientsListToolbar";
+import PropTypes from "prop-types";
+import { useState } from "react";
+import PerfectScrollbar from "react-perfect-scrollbar";
 import IngredientsListHeader from "./IngredientsListHeader";
+import IngredientsListToolbar from "./IngredientsListToolbar";
 
 const IngredientsListResults = ({
   ingredients,

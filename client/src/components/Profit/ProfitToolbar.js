@@ -1,41 +1,16 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  TextField,
-  InputAdornment,
-  SvgIcon,
-  Grid,
-  MenuItem,
-} from "@material-ui/core";
-import Tooltip from "@material-ui/core/Tooltip";
-import DeleteIcon from "@material-ui/icons/Delete";
-import { alpha } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import "date-fns";
-
-import { withStyles } from "@material-ui/core/styles";
-import Dialog from "@material-ui/core/Dialog";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import MuiDialogContent from "@material-ui/core/DialogContent";
-import MuiDialogActions from "@material-ui/core/DialogActions";
-
-import red from "@material-ui/core/colors/red";
-import CloseIcon from "@material-ui/icons/Close";
 import DateFnsUtils from "@date-io/date-fns";
+import { Box, Button, Card, CardContent } from "@material-ui/core";
+import Typography from "@material-ui/core/Typography";
 import {
-  MuiPickersUtilsProvider,
   KeyboardDatePicker,
-  KeyboardDateTimePicker,
+  MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
-import React, { useState } from "react";
-import { useFormik, Formik, getIn, FieldArray } from "formik";
-import * as yup from "yup";
+import "date-fns";
+import { useFormik } from "formik";
 import moment from "moment";
-import { Search as SearchIcon } from "react-feather";
+import React from "react";
+import * as yup from "yup";
+
 const validationSchema = yup.object({
   FromDate: yup.date("Select a date").required(),
   ToDate: yup.date("Select another date").required(),

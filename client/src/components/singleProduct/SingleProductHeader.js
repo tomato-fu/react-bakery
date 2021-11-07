@@ -1,23 +1,18 @@
-import * as React from "react";
-
-import Typography from "@material-ui/core/Typography";
 import {
-  CardContent,
-  Card,
-  Grid,
   Avatar,
-  Divider,
+  Card,
+  CardContent,
   CardHeader,
+  Divider,
+  Grid,
 } from "@material-ui/core";
-
-import { useParams } from "react-router";
-
 import { blue } from "@material-ui/core/colors";
-
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import Typography from "@material-ui/core/Typography";
 import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import BreakfastDiningIcon from "@mui/icons-material/BreakfastDining";
 import CallToActionIcon from "@mui/icons-material/CallToAction";
+import * as React from "react";
 
 const SingleProductHeader = ({ product }) => {
   const { Name, Price, FoodCost, TimeCost } = product;

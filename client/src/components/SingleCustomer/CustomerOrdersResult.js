@@ -1,21 +1,19 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
-import PerfectScrollbar from "react-perfect-scrollbar";
 import {
-  Button,
   Box,
+  Button,
   Card,
+  Container,
   Table,
   TableBody,
   TableCell,
   TablePagination,
   TableRow,
-  Container,
 } from "@material-ui/core";
-import customersOrder from "src/__mocks__/customersOrder";
-import CustomerOrdersHeader from "./CustomerOrdersHeader";
+import moment from "moment";
+import { useState } from "react";
+import PerfectScrollbar from "react-perfect-scrollbar";
 import { useSingleCustomerOrdersFetch } from "src/hooks/customer/useSingleCustomerOrdersFetch";
+import CustomerOrdersHeader from "./CustomerOrdersHeader";
 const CustomerOrdersResult = ({ customerID }) => {
   const {
     state: orders,

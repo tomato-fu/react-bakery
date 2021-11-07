@@ -2,12 +2,11 @@ import {
   Box,
   Card,
   CardContent,
-  TextField,
   InputAdornment,
   SvgIcon,
+  TextField,
 } from "@material-ui/core";
-import React, { useState, useEffect, useRef } from "react";
-
+import React, { useEffect, useRef, useState } from "react";
 import { Search as SearchIcon } from "react-feather";
 
 const SearchBar = ({ setKeyWord }) => {

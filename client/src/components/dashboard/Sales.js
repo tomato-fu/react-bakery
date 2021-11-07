@@ -1,20 +1,20 @@
-import { Bar } from "react-chartjs-2";
 import {
   Box,
   Button,
   Card,
   CardContent,
   CardHeader,
-  Divider,
-  useTheme,
   colors,
+  Divider,
   FormControl,
   MenuItem,
   Select,
+  useTheme,
 } from "@material-ui/core";
-import React, { useState } from "react";
-import moment from "moment";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import moment from "moment";
+import React, { useState } from "react";
+import { Bar } from "react-chartjs-2";
 import { useSalesLast14Fetch } from "src/hooks/sale/useSalesLast14Fetch";
 
 const Sales = (props) => {

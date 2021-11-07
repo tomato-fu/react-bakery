@@ -1,32 +1,38 @@
-# react-bakery
-## 客户
-需要把客户的一些个人信息存入数据库
-客户的个人页面中需要展示客户最喜欢的top7产品（根据购买了多少次决定）
-还有要统计客户的购买分布，网上订单和店里购买的百分比分布。
-还要展示客户关联的订单
+# React-Bakery
+Bakery Management System is a program built with React.js, Node.js, and MySQL that makes bakery owner life easier. It has 5 features including Order, Customer, Product, Sale Report and Profit Analysis.<br/>
 
-## 产品
-把产品的一些数据导入数据库，因为要一同导入制作这个产品的食谱，从而计算产品成本，可能会比较复杂点
+ The dashboard main structure is created by using [material-kit-react](https://github.com/devias-io/material-kit-react) and UI is created by using [MaterialUI](https://mui.com/)
 
-我在考虑实现产品置顶的功能，可能要数据库辅助
-在产品页面要展示买这个产品最多的前几个客户
-展示产品相关的订单
-展示网上订单和店里购买的分布
-展示产品的食谱
+Here is the Demo website for it: [Bakery](https://boring-wescoff-2f83ee.netlify.app)
 
-## 原料
-把原料相关的一些信息导入数据库，从而可以计算产品成本
-原料单个页面展示相关的产品
 
-## 订单
-导入客户预定的订单的数据，付费方式可以四种混合
+## Instructions for running it on localhost
 
-## 利润
-分析总的营业额，总的利润
-网上订单和实体店的营业额和利润要分开
+### Prerequisites:
+Install Node.js, React.js, and MySQL on your PC.
 
-## 店内销售
-主要记录当天实体店内的销售情况
-产品的开始数量，卖出数量，和丢弃数量
-在单天页面里展示当天的营业额和利润，还有损失的金额
-把当天售卖的产品展示出来
+### Step 1:
+Clone this react project to your PC. <br/>
+Cd to the client folder on terminal and type `npm install`. <br/>
+Cd to the server folder on terminal and type `npm install` as well. <br/>
+
+### Step 2:
+Open dbConfig.js file in the server folder and change `user` and `password` to your own.<br/>
+Load `Data.sql` in server folder to your MySQL by typing `source Data.sql` after you login to MySQL.
+
+### Step 3:
+Cd to the client folder on terminal and type `npm start`. <br/>
+Cd to the server folder on terminal and type `node index.js`. <br/>
+
+## Examples
+
+### Main page
+![image](https://user-images.githubusercontent.com/65717589/140665893-700c5e73-02fc-4e07-ab6b-5b30d253bb16.png)
+
+### Profit page
+![image](https://user-images.githubusercontent.com/65717589/140665924-f93adb27-a72e-4c27-aef0-92c3692a1c49.png)
+
+### Order Detail page
+![image](https://user-images.githubusercontent.com/65717589/140665971-e5e59785-6553-4891-a792-1e620e18b9b5.png)
+
+

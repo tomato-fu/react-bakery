@@ -14,9 +14,15 @@ import {
   Container,
 } from "@material-ui/core";
 import IngredientHeader from "./IngredientsHeader";
-import ingredientsProduct from "src/__mocks__/ingredientsProduct";
 
-const ProductIngredients = () => {
+import { useSingleProductRecipeFetch } from "src/hooks/product/useSingleProductRecipeFetch";
+const ProductIngredients = ({ productID }) => {
+  const {
+    state: Recipe,
+    loading,
+    error,
+  } = useSingleProductRecipeFetch(productID);
+
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
@@ -77,28 +83,33 @@ const ProductIngredients = () => {
                 onRequestSort={handleRequestSort}
               />
               <TableBody>
-                {stableSort(ingredientsProduct, getComparator(order, orderBy))
+                {stableSort(Array.from(Recipe), getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={row.ID}>
                         <TableCell
                           component="th"
                           scope="row"
                           padding="none"
                           align="center"
                         >
-                          {row.name}
+                          <a
+                            href={`/app/ingredients/${row.ID}`}
+                            style={{ color: "#1e88e5" }}
+                          >
+                            {row.Name}
+                          </a>
                         </TableCell>
 
                         <TableCell align="center">{row.grams}</TableCell>
-                        <TableCell align="center">{row.price}</TableCell>
+                        <TableCell align="center">{row.PricePerKG}</TableCell>
 
                         <TableCell align="center">
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/${row.id}`}
+                            href={`/app/ingredients/${row.ID}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View
@@ -113,7 +124,7 @@ const ProductIngredients = () => {
         </PerfectScrollbar>
         <TablePagination
           component="div"
-          count={ingredientsProduct.length}
+          count={Array.from(Recipe).length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

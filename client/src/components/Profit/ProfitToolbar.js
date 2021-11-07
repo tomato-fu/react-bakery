@@ -34,13 +34,13 @@ import {
 import React, { useState } from "react";
 import { useFormik, Formik, getIn, FieldArray } from "formik";
 import * as yup from "yup";
-
+import moment from "moment";
 import { Search as SearchIcon } from "react-feather";
 const validationSchema = yup.object({
   FromDate: yup.date("Select a date").required(),
   ToDate: yup.date("Select another date").required(),
 });
-const ProfitToolbar = (props) => {
+const ProfitToolbar = ({ setStartDate, setEndDate }) => {
   const formik = useFormik({
     initialValues: {
       FromDate: null,
@@ -48,7 +48,8 @@ const ProfitToolbar = (props) => {
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+      setStartDate(moment(values.FromDate).format("YYYY-MM-DD"));
+      setEndDate(moment(values.ToDate).format("YYYY-MM-DD"));
     },
   });
   return (

@@ -16,14 +16,8 @@ import { blue } from "@material-ui/core/colors";
 import PhoneIcon from "@material-ui/icons/Phone";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
-import { useSingleCustomerFetch } from "src/hooks/useSingleCustomerFetch";
-const SingleCustomerHeader = (customerID) => {
-  const {
-    state: customer,
-    loading,
-    error,
-  } = useSingleCustomerFetch(customerID);
 
+const SingleCustomerHeader = ({ customer }) => {
   const {
     CustomerName,
     WeChatID,
@@ -33,7 +27,6 @@ const SingleCustomerHeader = (customerID) => {
     joinDate,
     phoneNumber,
     zip,
-    comment,
   } = customer;
   return (
     <Card sx={{ height: "100%" }}>

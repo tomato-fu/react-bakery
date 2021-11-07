@@ -15,8 +15,14 @@ import {
 } from "@material-ui/core";
 import IngredientProductsHeader from "./IngredientProductsHeader";
 import ProductsInIngredient from "src/__mocks__/ProductsInIngredient";
+import { useSingleIngredientProductsFetch } from "src/hooks/ingredient/useSingleIngredientProductsFetch";
+const IngredientProducts = ({ ingredientID }) => {
+  const {
+    state: products,
+    loading,
+    error,
+  } = useSingleIngredientProductsFetch(ingredientID);
 
-const IngredientProducts = () => {
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
@@ -77,28 +83,33 @@ const IngredientProducts = () => {
                 onRequestSort={handleRequestSort}
               />
               <TableBody>
-                {stableSort(ProductsInIngredient, getComparator(order, orderBy))
+                {stableSort(Array.from(products), getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={row.ID}>
                         <TableCell
                           component="th"
                           scope="row"
                           padding="none"
                           align="center"
                         >
-                          {row.name}
+                          <a
+                            href={`/app/products/${row.ID}`}
+                            style={{ color: "#1e88e5" }}
+                          >
+                            {row.Name}
+                          </a>
                         </TableCell>
-                        <TableCell align="center">{row.weight}</TableCell>
-                        <TableCell align="center">{row.costItem}</TableCell>
-                        <TableCell align="center">{row.costRecipe}</TableCell>
+                        <TableCell align="center">{row.grams}</TableCell>
+                        <TableCell align="center">{row.FoodCost}</TableCell>
+
                         <TableCell align="center">{row.price}</TableCell>
                         <TableCell align="center">
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/products/${row.id}`}
+                            href={`/app/products/${row.ID}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View
@@ -113,7 +124,7 @@ const IngredientProducts = () => {
         </PerfectScrollbar>
         <TablePagination
           component="div"
-          count={ProductsInIngredient.length}
+          count={Array.from(products).length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

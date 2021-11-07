@@ -13,28 +13,22 @@ import { visuallyHidden } from "@material-ui/utils";
 
 const headCells = [
   {
-    id: "product",
+    id: "Name",
     numeric: false,
     disablePadding: true,
     label: "Product",
   },
   {
-    id: "weight",
+    id: "grams",
     numeric: true,
     disablePadding: false,
     label: "Grams in Recipe",
   },
   {
-    id: "costItem",
+    id: "FoodCost",
     numeric: true,
     disablePadding: false,
     label: "Ingredient Cost per Item",
-  },
-  {
-    id: "costRecipe",
-    numeric: true,
-    disablePadding: false,
-    label: "Ingredient Cost per Recipe",
   },
   {
     id: "price",

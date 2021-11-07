@@ -33,13 +33,13 @@ const headCells = [
     label: "Order Profit",
   },
   {
-    id: "storeRevenue",
+    id: "saleRevenue",
     numeric: true,
     disablePadding: true,
     label: "In-store Revenue",
   },
   {
-    id: "storeProfit",
+    id: "saleProfit",
     numeric: true,
     disablePadding: true,
     label: "In-store Profit",
@@ -91,16 +91,24 @@ function ProfitHeader(props) {
           <TableCell
             key={headCell.id}
             align={"center"}
-            padding={headCell.disablePadding ? "none" : "normal"}
+            padding={headCell.disablePadding ? "none" : "default"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
-              active={headCell.id === "view" ? false : orderBy === headCell.id}
+              active={
+                headCell.id === "viewSales" || headCell.id === "viewOrders"
+                  ? false
+                  : orderBy === headCell.id
+              }
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={
-                headCell.id === "view" ? null : createSortHandler(headCell.id)
+                headCell.id === "viewSales" || headCell.id === "viewOrders"
+                  ? null
+                  : createSortHandler(headCell.id)
               }
-              hideSortIcon={headCell.id === "view"}
+              hideSortIcon={
+                headCell.id === "viewSales" || headCell.id === "viewOrders"
+              }
             >
               {headCell.label}
               {orderBy === headCell.id ? (

@@ -13,26 +13,26 @@ import { visuallyHidden } from "@material-ui/utils";
 
 const headCells = [
   {
-    id: "product",
+    id: "Name",
     numeric: false,
     disablePadding: false,
     label: "Product",
   },
 
   {
-    id: "startQuantity",
+    id: "StartQuantity",
     numeric: true,
     disablePadding: false,
     label: "Start Quantity",
   },
   {
-    id: "soldQuantity",
+    id: "QuantitySold",
     numeric: true,
     disablePadding: false,
     label: "Sold",
   },
   {
-    id: "price",
+    id: "PriceAtSale",
     numeric: true,
     disablePadding: false,
     label: "Price",
@@ -43,26 +43,21 @@ const headCells = [
     disablePadding: false,
     label: "Revenue",
   },
+
   {
-    id: "foodCost",
-    numeric: true,
-    disablePadding: false,
-    label: "Cost Per Item",
-  },
-  {
-    id: "totalCost",
+    id: "FoodCostAtSale",
     numeric: true,
     disablePadding: false,
     label: "Food Cost",
   },
   {
-    id: "trashQuantity",
+    id: "QuantityTrashed",
     numeric: true,
     disablePadding: false,
     label: "Trashed",
   },
   {
-    id: "lostRevenue",
+    id: "lost",
     numeric: true,
     disablePadding: false,
     label: "Lost Revenue",

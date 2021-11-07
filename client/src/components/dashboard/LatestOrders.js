@@ -17,7 +17,10 @@ import {
 } from "@material-ui/core";
 import Chip from "@mui/material/Chip";
 import LatestOrdersHeader from "./LatestOrdersHeader";
-const LatestOrders = ({ orders, ...rest }) => {
+import { useLastedOrdersFetch } from "src/hooks/order/useLastedOrdersFetch";
+const LatestOrders = () => {
+  const { state: orders, loading, error } = useLastedOrdersFetch();
+  console.log(orders);
   const [selectOrderIDs, setSelectOrderIDs] = useState([]);
   const [limit, setLimit] = useState(6);
   const [page, setPage] = useState(0);
@@ -69,7 +72,7 @@ const LatestOrders = ({ orders, ...rest }) => {
 
   return (
     <Container maxWidth={false}>
-      <Card {...rest}>
+      <Card>
         <CardHeader title="Latest Orders" />
         <Divider />
         <PerfectScrollbar>
@@ -82,11 +85,11 @@ const LatestOrders = ({ orders, ...rest }) => {
                 rowCount={orders.length}
               />
               <TableBody>
-                {stableSort(orders, getComparator(order, orderBy))
+                {stableSort(Array.from(orders), getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
                     return (
-                      <TableRow hover role="checkbox" key={row.orderID}>
+                      <TableRow hover role="checkbox" key={row.ID}>
                         <TableCell
                           component="th"
                           scope="row"
@@ -94,27 +97,36 @@ const LatestOrders = ({ orders, ...rest }) => {
                           align="center"
                         >
                           <a
-                            href={`/app/orders/${row.orderID}`}
+                            href={`/app/orders/${row.ID}`}
                             style={{ color: "#1e88e5" }}
                           >
-                            {row.orderID}
+                            {row.ID}
                           </a>
                         </TableCell>
-                        <TableCell align="center">{row.customer}</TableCell>
                         <TableCell align="center">
-                          {moment(row.pickTime).format("MM/DD/YYYY HH:mm:ss")}
+                          <a
+                            href={`/app/customers/${row.CustomerID}`}
+                            style={{ color: "#1e88e5" }}
+                          >
+                            {row.CustomerName}
+                          </a>
                         </TableCell>
                         <TableCell align="center">
-                          {moment(row.placedDate).format("MM/DD/YYYY")}
+                          {moment(row.PickupTime).format("MM/DD/YYYY HH:mm:ss")}
                         </TableCell>
                         <TableCell align="center">
-                          {row.fulfilled ? (
+                          {moment(row.DatePlaced).format("MM/DD/YYYY")}
+                        </TableCell>
+                        <TableCell align="center">
+                          {row.Fulfilled ? (
                             <Chip label="Yes" color="success" size="small" />
                           ) : (
                             <Chip label="No" color="error" size="small" />
                           )}
                         </TableCell>
-                        <TableCell align="center">{row.comment}</TableCell>
+                        <TableCell align="center">
+                          {row.Comment || "Null"}
+                        </TableCell>
                       </TableRow>
                     );
                   })}

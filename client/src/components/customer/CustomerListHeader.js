@@ -15,31 +15,31 @@ import { visuallyHidden } from "@material-ui/utils";
 
 const headCells = [
   {
-    id: "name",
+    id: "CustomerName",
     numeric: false,
     disablePadding: true,
     label: "Name",
   },
   {
-    id: "wechatID",
+    id: "WeChatID",
     numeric: false,
     disablePadding: false,
     label: "WeChatID",
   },
   {
-    id: "location",
+    id: "addressOne",
     numeric: false,
     disablePadding: false,
     label: "Location",
   },
   {
-    id: "phone",
+    id: "phoneNumber",
     numeric: false,
     disablePadding: false,
     label: "Phone",
   },
   {
-    id: "createdAt",
+    id: "joinDate",
     numeric: false,
     disablePadding: false,
     label: "Join Date",
@@ -88,18 +88,18 @@ function CustomerListHeader(props) {
           >
             <TableSortLabel
               active={
-                headCell.id === "location" || headCell.id === "view"
+                headCell.id === "addressOne" || headCell.id === "view"
                   ? false
                   : orderBy === headCell.id
               }
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={
-                headCell.id === "location" || headCell.id === "view"
+                headCell.id === "addressOne" || headCell.id === "view"
                   ? null
                   : createSortHandler(headCell.id)
               }
               hideSortIcon={
-                headCell.id === "location" || headCell.id === "view"
+                headCell.id === "addressOne" || headCell.id === "view"
               }
             >
               {headCell.label}

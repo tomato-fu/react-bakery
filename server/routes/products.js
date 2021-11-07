@@ -22,6 +22,25 @@ router.post("/createProduct", (req, res) => {
   );
 });
 
+//update product
+router.put("/updateProduct", (req, res) => {
+  const productID = req.body.productID;
+  const productName = req.body.productName;
+  const price = req.body.price;
+  const foodCost = req.body.foodCost;
+  const timeCost = req.body.timeCost;
+  const comment = req.body.comment;
+
+  db.query(
+    "UPDATE Product SET Name=?, Price=?,FoodCost=?,TimeCost=?,Comment=? WHERE ID=?",
+    [productName, price, foodCost, timeCost, comment, productID],
+    (err, result) => {
+      if (err) console.log(err);
+      else res.send("value updated");
+    }
+  );
+});
+
 //get Products
 router.get("/getProducts", (req, res) => {
   db.query("SELECT * FROM Product", (err, result) => {
@@ -30,18 +49,90 @@ router.get("/getProducts", (req, res) => {
   });
 });
 
+//get Products by keyWord
+router.get("/getProductsKeyWord", (req, res) => {
+  const keyWord = req.query.keyWord;
+  db.query("CALL fetch_products_keyword(?)", keyWord, (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
+});
+
+//get Product total quantity in order
+router.get("/getOrderQuantity", (req, res) => {
+  const productID = req.query.productID;
+
+  db.query("CALL fetch_product_quantity(?)", productID, (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
+});
+//get Product total quantity in sales
+router.get("/getSaleQuantity", (req, res) => {
+  const productID = req.query.productID;
+
+  db.query("CALL fetch_product_quantity_sale(?)", productID, (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
+});
+
+//get Product total quantity in order
+router.get("/getOrderQuantityKeyWord", (req, res) => {
+  const keyWord = req.query.keyWord;
+
+  db.query("CALL fetch_product_quantity_Keyword(?)", keyWord, (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
+});
+
+//get Product related order
+router.get("/getOrders", (req, res) => {
+  const productID = req.query.productID;
+
+  db.query("CALL fetch_product_orders(?)", productID, (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
+});
+
+//get Product top customers
+router.get("/getTopCustomers", (req, res) => {
+  const productID = req.query.productID;
+
+  db.query("CALL fetch_product_top_customer(?)", productID, (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
+});
+
 //get Product
 router.get("/getProduct", (req, res) => {
-  const productID = JSON.parse(req.query.productID);
+  const productID = req.query.productID;
 
-  db.query(
-    "CALL fetch_single_product(?)",
-    productID.productID,
-    (err, result) => {
-      if (err) console.log(err);
-      else res.send(result);
-    }
-  );
+  db.query("CALL fetch_single_product(?)", productID, (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
+});
+
+//get Products Quantity
+router.get("/getProductQuantity", (req, res) => {
+  db.query("SELECT COUNT(ID) As quantity FROM Product", (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
+});
+
+//get recipe of product
+router.get("/getRecipe", (req, res) => {
+  const productID = req.query.productID;
+
+  db.query("CALL fetch_product_recipe(?)", productID, (err, result) => {
+    if (err) console.log(err);
+    else res.send(result);
+  });
 });
 
 //delete product

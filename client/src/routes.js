@@ -12,6 +12,7 @@ import Customer from "./pages/Customer";
 import Product from "./pages/Product";
 import OrdersList from "./pages/OrdersList";
 import Order from "./pages/Order";
+import OrderEdit from "./components/order/OrderEdit";
 import Ingredient from "./pages/Ingredient";
 import Profit from "./pages/Profit";
 import Store from "./pages/Store";
@@ -26,13 +27,18 @@ const routes = [
       { path: "products", element: <ProductList /> },
       { path: "ingredients", element: <IngredientsList /> },
       { path: "orders", element: <OrdersList /> },
+      {
+        path: "ordersRanged/:startDate/:endDate",
+        element: <OrdersList key={new Date().toISOString} />,
+      },
       { path: "profits", element: <Profit /> },
       { path: "sales", element: <Store /> },
 
       { path: "/customers/:customerID", element: <Customer /> },
       { path: "/orders/:orderID", element: <Order /> },
+      { path: "/orders/edit", element: <OrderEdit /> },
       { path: "/ingredients/:ingredientID", element: <Ingredient /> },
-      { path: "/products/:prodcutID", element: <Product /> },
+      { path: "/products/:productID", element: <Product /> },
       { path: "/sales/:saleID", element: <SingleStore /> },
 
       { path: "*", element: <Navigate to="/404" /> },

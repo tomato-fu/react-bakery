@@ -35,4 +35,18 @@ router.post("/createRecipeIngredient", (req, res) => {
   );
 });
 
+//delete recipe_ingredient
+//delete order detail
+router.delete("/deleteRecipeDetail", (req, res) => {
+  const recipeID = req.query.recipeID;
+
+  db.query(
+    `DELETE FROM Recipe_Ingredient WHERE Recipe_ID = ${recipeID} `,
+    (err, result) => {
+      if (err) console.log(err);
+      else res.send(result);
+    }
+  );
+});
+
 module.exports = router;

@@ -1,26 +1,30 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-export const useProductsFetch = () => {
-  const [state, setState] = useState([]);
+export const usePointsFetch = (customerID) => {
+  const [state, setState] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [update, setUpdate] = useState(false);
+
   useEffect(() => {
-    const fetchProducts = () => {
+    const fetchPoints = () => {
       try {
         setLoading(true);
         setError(false);
         axios
-          .get("http://localhost:3004/products/getProducts")
-          .then((res) => setState(res.data))
+          .get("http://localhost:3004/customers/getPoints", {
+            params: {
+              customerID: customerID,
+            },
+          })
+          .then((res) => setState(res.data[0]))
           .catch((err) => console.log(err));
         setLoading(false);
       } catch (error) {
         setError(true);
       }
     };
-    fetchProducts();
-  }, [update]);
+    fetchPoints();
+  }, []);
 
-  return { state, loading, error, setState, update, setUpdate };
+  return { state, loading, error, setState };
 };

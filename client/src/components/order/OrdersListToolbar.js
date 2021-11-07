@@ -22,6 +22,7 @@ import Dialog from "@material-ui/core/Dialog";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 import MuiDialogActions from "@material-ui/core/DialogActions";
+import DialogContentText from "@mui/material/DialogContentText";
 
 import red from "@material-ui/core/colors/red";
 import CloseIcon from "@material-ui/icons/Close";
@@ -31,13 +32,21 @@ import {
   KeyboardDatePicker,
   KeyboardDateTimePicker,
 } from "@material-ui/pickers";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormik, Formik, getIn, FieldArray } from "formik";
 import * as yup from "yup";
-import customers from "src/__mocks__/customers";
-import products from "src/__mocks__/products";
+import { useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { Search as SearchIcon } from "react-feather";
-
+import { useCustomersFetch } from "src/hooks/customer/useCutomersFetch";
+import { usePaymentTypeFetch } from "src/hooks/payment/usePaymentTypeFetch";
+import { useProductsFetch } from "src/hooks/product/useProductsFetch";
+import axios from "axios";
+import moment from "moment";
+import { Alert } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
+import SearchBar from "./SearchBar";
+import { usePointsFetch } from "src/hooks/customer/usePointsFetch";
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -45,7 +54,6 @@ const styles = (theme) => ({
   },
 });
 
-const payments = ["Wechat", "Cash", "Card", "Points"];
 const validationSchemaDate = yup.object({
   FromDate: yup.date("Select a date").required(),
   ToDate: yup.date("Select another date").required(),
@@ -55,13 +63,16 @@ const validationSchema = yup.object({
   plcedDate: yup.date("Select a palced date").required(),
   pickTime: yup.date("Select a pick time").required(),
   amount: yup.number("Enter payment amount"),
+
   comment: yup.string("Enter order comment"),
   payment: yup.array().of(
     yup.object({
       method: yup
         .string("Select a payment method")
         .required("Select a payment method"),
-      amount: yup.number("Enter payment amount"),
+      amount: yup
+        .number("Enter payment amount")
+        .moreThan(0, "Please enter a valid value"),
     })
   ),
   products: yup.array().of(
@@ -71,7 +82,8 @@ const validationSchema = yup.object({
         .required("Please select a product"),
       quantity: yup
         .number("Enter product quantity")
-        .required("Please enter a quantity"),
+        .required("Please enter a quantity")
+        .moreThan(0, "Please enter a valid value"),
       comment: yup.string("Enter comment"),
     })
   ),
@@ -107,17 +119,84 @@ const DialogContent = withStyles((theme) => ({
   },
 }))(MuiDialogContent);
 
+const DialogActions = withStyles((theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(1),
+  },
+}))(MuiDialogActions);
+
 const OrdersListToolbar = (props) => {
-  const { numSelected } = props;
+  const { state: customers } = useCustomersFetch();
+  const { state: paymentTypes } = usePaymentTypeFetch();
+  const { state: products } = useProductsFetch();
+  let { startDate, endDate } = useParams();
+  startDate = startDate || "2020-01-01";
+  endDate = endDate || new Date().toISOString().slice(0, 10);
+  const nav = useNavigate();
+
+  const {
+    numSelected,
+    selectedIds,
+    setSelectedIds,
+    orders,
+    setOrders,
+    setSearchTerm,
+    update,
+    setUpdate,
+  } = props;
   const [open, setOpen] = React.useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [disable, setDisable] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [showDuplicate, setShowDuplicate] = useState(false);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [orders]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowDelete(false);
+    }, 3000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [orders]);
+
+  const deleteOrders = () => {
+    axios
+      .delete("http://localhost:3004/orders/deleteOrders", {
+        params: {
+          deleteIDs: selectedIds,
+        },
+      })
+      .then(() => {
+        setUpdate(!update);
+        setSelectedIds([]);
+      })
+      .catch((err) => console.log(err));
+  };
+
   const formikDate = useFormik({
     initialValues: {
-      FromDate: null,
-      ToDate: null,
+      FromDate: new Date(moment(startDate).format("MM/DD/YYYY")),
+      ToDate: new Date(moment(endDate).format("MM/DD/YYYY")),
     },
     validationSchema: validationSchemaDate,
     onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+      nav(
+        `/app/ordersRanged/${moment(values.FromDate).format(
+          "YYYY-MM-DD"
+        )}/${moment(values.ToDate).format("YYYY-MM-DD")}`
+      );
+      setUpdate(!update);
     },
   });
   const handleClickOpen = () => {
@@ -155,7 +234,11 @@ const OrdersListToolbar = (props) => {
 
           {numSelected > 0 ? (
             <Tooltip title="Delete">
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  setOpenDelete(true);
+                }}
+              >
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
@@ -177,29 +260,40 @@ const OrdersListToolbar = (props) => {
             </Box>
           )}
         </Toolbar>
+
+        <Dialog
+          open={openDelete}
+          onClose={() => setOpenDelete(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Warning, this operation cannot be reversed!"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete those data? Once you press "yes",
+              it cannot be restored.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                deleteOrders();
+                setOpenDelete(false);
+                setShowDelete(true);
+              }}
+              style={{ color: "#f44336" }}
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
 
       <Box sx={{ mt: 3 }}>
-        <Card>
-          <CardContent>
-            <Box sx={{ maxWidth: 500 }}>
-              <TextField
-                fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SvgIcon fontSize="small" color="action">
-                        <SearchIcon />
-                      </SvgIcon>
-                    </InputAdornment>
-                  ),
-                }}
-                placeholder="Search order"
-                variant="outlined"
-              />
-            </Box>
-          </CardContent>
-        </Card>
+        <SearchBar setSearchTerm={setSearchTerm} />
       </Box>
 
       <Box sx={{ mt: 3 }}>
@@ -286,16 +380,134 @@ const OrdersListToolbar = (props) => {
             <Formik
               initialValues={{
                 customer: "",
-                plcedDate: null,
-                pickTime: null,
+                plcedDate: new Date(),
+                pickTime: new Date(),
                 amount: 0,
                 comment: "",
                 payment: [],
                 products: [],
               }}
               validationSchema={validationSchema}
-              onSubmit={(values) => {
-                alert(JSON.stringify(values, null, 2));
+              onSubmit={(values, formik) => {
+                let orderID = 0;
+                let totalPoints = 0;
+                let points = {};
+                //calculate the foodCost
+                console.log(values.payment);
+                if (values.amount === 0) {
+                  values.products.map((item) => {
+                    products.map((product) => {
+                      if (item.product == product.ID) {
+                        values.amount += item.quantity * product.Price;
+                      }
+                    });
+                  });
+                }
+
+                axios
+                  .get("http://localhost:3004/customers/getPoints", {
+                    params: {
+                      customerID: values.customer,
+                    },
+                  })
+                  .then((res) => (points = res.data[0]))
+                  .then(() => {
+                    if (
+                      Array.from(points).length === 2 &&
+                      points !== undefined
+                    ) {
+                      totalPoints =
+                        Array.from(points)[0].total -
+                        Array.from(points)[1].total;
+                    } else if (
+                      Array.from(points).length === 1 &&
+                      points !== undefined
+                    ) {
+                      totalPoints = Array.from(points)[0].total;
+                    }
+
+                    const result = values.payment.find(
+                      (item) => item.method === 3
+                    ) || { amount: 0 };
+                    const pointsNeeded = result.amount;
+
+                    const uniqueProducts = new Set(
+                      values.products.map((item) => item.product)
+                    );
+
+                    if (pointsNeeded > totalPoints) {
+                      values.amount = 0;
+                      setShowError(true);
+                      setTimeout(() => {
+                        setShowError(false);
+                      }, 3000);
+                    } else if (uniqueProducts.size < values.products.length) {
+                      values.amount = 0;
+                      setShowDuplicate(true);
+                      setTimeout(() => {
+                        setShowDuplicate(false);
+                      }, 3000);
+                    } else {
+                      axios
+                        .post("http://localhost:3004/orders/createOrder", {
+                          customer: values.customer,
+                          placedDate: moment(values.plcedDate).format(
+                            "YYYY-MM-DD"
+                          ),
+                          pickTime: moment(values.pickTime).format(
+                            "YYYY-MM-DD HH:mm:ss"
+                          ),
+                          fullFilled: 0,
+                          comment: values.comment,
+                          amount: values.amount,
+                        })
+                        .then((res) => {
+                          setDisable(true);
+                          orderID = res.data;
+                          const allPromises = values.payment.map((type) => {
+                            const promise_axios = axios.post(
+                              "http://localhost:3004/payments/createPayement",
+                              {
+                                orderID: orderID,
+                                PaymentTypeID: type.method,
+                                Amount: type.amount,
+                              }
+                            );
+                            return promise_axios;
+                          });
+                          Promise.all(allPromises).then(() => {
+                            const allPromises = values.products.map(
+                              (product) => {
+                                const promise_axios = axios.post(
+                                  "http://localhost:3004/orders/createOrderDetail",
+                                  {
+                                    orderID: orderID,
+                                    productID: product.product,
+                                    quantity: product.quantity,
+                                    comment: product.comment,
+                                    priceAtSale: products.find(
+                                      ({ ID }) => ID == product.product
+                                    ).Price,
+                                    foodCostAtSale: products.find(
+                                      ({ ID }) => ID == product.product
+                                    ).FoodCost,
+                                  }
+                                );
+                                return promise_axios;
+                              }
+                            );
+                            Promise.all(allPromises)
+                              .then(() => {
+                                setDisable(false);
+                                setShowSuccess(true);
+                                setUpdate(!update);
+                                formik.resetForm();
+                              })
+                              .catch(() => console.log("error"));
+                          });
+                        });
+                    }
+                  });
               }}
             >
               {(formik) => (
@@ -344,8 +556,8 @@ const OrdersListToolbar = (props) => {
                           }
                         >
                           {customers.map((option) => (
-                            <MenuItem key={option.name} value={option.name}>
-                              {option.name}
+                            <MenuItem key={option.ID} value={option.ID}>
+                              {option.CustomerName}
                             </MenuItem>
                           ))}
                         </TextField>
@@ -457,7 +669,6 @@ const OrdersListToolbar = (props) => {
                       id="comment"
                       fullWidth
                       rows={5}
-                      maxRows={10}
                       label="Comment"
                       multiline
                       variant="outlined"
@@ -496,7 +707,6 @@ const OrdersListToolbar = (props) => {
                               arrayHelpers.push({
                                 method: "",
                                 amount: 0,
-                                id: Math.random(),
                               })
                             }
                             style={{ marginBottom: "0.5rem" }}
@@ -509,7 +719,7 @@ const OrdersListToolbar = (props) => {
                             const touchedMethod = getIn(formik.touched, method);
                             const errorMethod = getIn(formik.errors, method);
                             const amount = `payment[${index}].amount`;
-                            const touchedAmount = getIn(formik.touch, amount);
+                            const touchedAmount = getIn(formik.touched, amount);
                             const errorAmount = getIn(formik.errors, amount);
                             return (
                               <Grid
@@ -536,9 +746,12 @@ const OrdersListToolbar = (props) => {
                                     )}
                                     variant="standard"
                                   >
-                                    {payments.map((option) => (
-                                      <MenuItem key={option} value={option}>
-                                        {option}
+                                    {paymentTypes.map((option) => (
+                                      <MenuItem
+                                        key={option.ID}
+                                        value={option.ID}
+                                      >
+                                        {option.Type}
                                       </MenuItem>
                                     ))}
                                   </TextField>
@@ -610,7 +823,7 @@ const OrdersListToolbar = (props) => {
                               arrayHelpers.push({
                                 product: "",
                                 quantity: 0,
-                                id: Math.random(),
+
                                 comment: "",
                               })
                             }
@@ -628,7 +841,7 @@ const OrdersListToolbar = (props) => {
                             const errorProduct = getIn(formik.errors, product);
                             const quantity = `products[${index}].quantity`;
                             const touchedQuantity = getIn(
-                              formik.touch,
+                              formik.touched,
                               quantity
                             );
                             const errorQuantity = getIn(
@@ -637,7 +850,10 @@ const OrdersListToolbar = (props) => {
                             );
 
                             const comment = `products[${index}].comment`;
-                            const touchedComment = getIn(formik.touch, comment);
+                            const touchedComment = getIn(
+                              formik.touched,
+                              comment
+                            );
                             const errorComment = getIn(formik.errors, comment);
                             return (
                               <Grid
@@ -667,10 +883,10 @@ const OrdersListToolbar = (props) => {
                                   >
                                     {products.map((option) => (
                                       <MenuItem
-                                        key={option.title}
-                                        value={option.title}
+                                        key={option.ID}
+                                        value={option.ID}
                                       >
-                                        {option.title}
+                                        {option.Name}
                                       </MenuItem>
                                     ))}
                                   </TextField>
@@ -748,6 +964,58 @@ const OrdersListToolbar = (props) => {
                   >
                     Submit
                   </Button>
+
+                  <div
+                    style={{
+                      width: "90vw",
+                      margin: "0 auto",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+
+                      padding: "2rem",
+                      borderRadius: "5px",
+                      background: "#fff",
+                      shadows: " 0 2px 10px rgb(0 0 0 / 30%)",
+                    }}
+                  >
+                    {disable && (
+                      <CircularProgress sx={{ position: "fixed", top: 0 }} />
+                    )}
+                    {showSuccess && (
+                      <Alert
+                        severity="success"
+                        sx={{ position: "fixed", top: 0 }}
+                      >
+                        Create a new order successfully!
+                      </Alert>
+                    )}
+                    {showDelete && (
+                      <Alert
+                        severity="success"
+                        sx={{ position: "fixed", top: 0 }}
+                      >
+                        Delete successfully!
+                      </Alert>
+                    )}
+                    {showError && (
+                      <Alert
+                        severity="error"
+                        sx={{ position: "fixed", top: 0 }}
+                      >
+                        Customer's points are not enough for this payment!
+                      </Alert>
+                    )}
+
+                    {showDuplicate && (
+                      <Alert
+                        severity="error"
+                        sx={{ position: "fixed", top: 0 }}
+                      >
+                        Don't select duplicated product!
+                      </Alert>
+                    )}
+                  </div>
                 </form>
               )}
             </Formik>

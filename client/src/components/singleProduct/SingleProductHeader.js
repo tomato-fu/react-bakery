@@ -18,8 +18,9 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
 import BreakfastDiningIcon from "@mui/icons-material/BreakfastDining";
 import CallToActionIcon from "@mui/icons-material/CallToAction";
-const SingleProductHeader = () => {
-  const { productID } = useParams();
+
+const SingleProductHeader = ({ product }) => {
+  const { Name, Price, FoodCost, TimeCost } = product;
   return (
     <Card sx={{ height: "100%" }}>
       <CardHeader title="Product Info" />
@@ -35,7 +36,7 @@ const SingleProductHeader = () => {
               Name:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              Apple cake
+              {Name}
             </Typography>
           </Grid>
           <Grid item>
@@ -61,7 +62,7 @@ const SingleProductHeader = () => {
               Price:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              $12
+              ${Price}
             </Typography>
           </Grid>
           <Grid item>
@@ -87,7 +88,7 @@ const SingleProductHeader = () => {
               Food Cost:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              $9
+              ${FoodCost}
             </Typography>
           </Grid>
           <Grid item>
@@ -113,7 +114,7 @@ const SingleProductHeader = () => {
               Time Cost:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              60 mintues
+              {TimeCost} mintues
             </Typography>
           </Grid>
           <Grid item>

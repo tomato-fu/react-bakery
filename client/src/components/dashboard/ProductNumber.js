@@ -11,32 +11,35 @@ import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import CakeIcon from "@mui/icons-material/Cake";
 import { blue } from "@material-ui/core/colors";
 import { green } from "@material-ui/core/colors";
-
-const ProductNumber = (props) => (
-  <Card sx={{ height: "100%" }} {...props}>
-    <CardContent>
-      <Grid container spacing={3} sx={{ justifyContent: "space-between" }}>
-        <Grid item>
-          <Typography color="textSecondary" gutterBottom variant="h6">
-            PRODUCTS NUMBER
-          </Typography>
-          <Typography color="textPrimary" variant="h3">
-            24
-          </Typography>
+import { useTotalProductQuantityFetch } from "src/hooks/product/useTotalProductQuantityFetch";
+const ProductNumber = (props) => {
+  const { state, loading, error } = useTotalProductQuantityFetch();
+  console.log(state);
+  return (
+    <Card sx={{ height: "100%" }} {...props}>
+      <CardContent>
+        <Grid container spacing={3} sx={{ justifyContent: "space-between" }}>
+          <Grid item>
+            <Typography color="textSecondary" gutterBottom variant="h6">
+              PRODUCTS NUMBER
+            </Typography>
+            <Typography color="textPrimary" variant="h3">
+              {state.quantity}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Avatar
+              sx={{
+                backgroundColor: blue[600],
+                height: 56,
+                width: 56,
+              }}
+            >
+              <CakeIcon />
+            </Avatar>
+          </Grid>
         </Grid>
-        <Grid item>
-          <Avatar
-            sx={{
-              backgroundColor: blue[600],
-              height: 56,
-              width: 56,
-            }}
-          >
-            <CakeIcon />
-          </Avatar>
-        </Grid>
-      </Grid>
-      <Box
+        {/* <Box
         sx={{
           pt: 2,
           display: "flex",
@@ -56,9 +59,10 @@ const ProductNumber = (props) => (
         <Typography color="textSecondary" variant="caption">
           Since last month
         </Typography>
-      </Box>
-    </CardContent>
-  </Card>
-);
+      </Box> */}
+      </CardContent>
+    </Card>
+  );
+};
 
 export default ProductNumber;

@@ -15,19 +15,19 @@ import { visuallyHidden } from "@material-ui/utils";
 
 const headCells = [
   {
-    id: "name",
+    id: "Name",
     numeric: false,
     disablePadding: true,
     label: "Name",
   },
   {
-    id: "price",
+    id: "PricePerKG",
     numeric: true,
     disablePadding: true,
     label: "Price/kg",
   },
   {
-    id: "comment",
+    id: "Note",
     numeric: false,
     disablePadding: true,
     label: "Note",

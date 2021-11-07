@@ -14,14 +14,7 @@ import EcoIcon from "@material-ui/icons/Eco";
 import { blue } from "@material-ui/core/colors";
 
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
-import { useSingleIngredientFetch } from "src/hooks/useSingleIngredientFetch";
-const SingleIngredientHeader = (ingredientID) => {
-  const {
-    state: ingredient,
-    loading,
-    error,
-  } = useSingleIngredientFetch(ingredientID);
-
+const SingleIngredientHeader = ({ ingredient }) => {
   const { Name, PricePerKG } = ingredient;
   return (
     <Card sx={{ height: "100%" }}>

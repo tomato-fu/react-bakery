@@ -34,7 +34,7 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import axios from "axios";
 
-import { Search as SearchIcon } from "react-feather";
+import SearchBar from "./SearchBar";
 
 const styles = (theme) => ({
   root: {
@@ -45,7 +45,10 @@ const styles = (theme) => ({
 
 const validationSchema = yup.object({
   ingredientName: yup.string("Enter ingredient name").required(),
-  price: yup.number("Enter ingredient price per kg").required(),
+  price: yup
+    .number("Enter ingredient price per kg")
+    .required()
+    .moreThan(0, "Please enter a valid value"),
   comment: yup.string("Enter comment"),
 });
 
@@ -95,6 +98,7 @@ const IngredientsListToolbar = (props) => {
     update,
     setUpdate,
     setSelectedIds,
+    setKeyWord,
   } = props;
   const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -254,26 +258,7 @@ const IngredientsListToolbar = (props) => {
       </Box>
 
       <Box sx={{ mt: 3 }}>
-        <Card>
-          <CardContent>
-            <Box sx={{ maxWidth: 500 }}>
-              <TextField
-                fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SvgIcon fontSize="small" color="action">
-                        <SearchIcon />
-                      </SvgIcon>
-                    </InputAdornment>
-                  ),
-                }}
-                placeholder="Search ingredient"
-                variant="outlined"
-              />
-            </Box>
-          </CardContent>
-        </Card>
+        <SearchBar setKeyWord={setKeyWord} />
       </Box>
 
       <div>

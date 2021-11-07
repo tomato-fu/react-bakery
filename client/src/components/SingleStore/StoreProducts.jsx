@@ -1,9 +1,6 @@
 import { useState } from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import {
-  Button,
   Box,
   Card,
   Table,
@@ -14,13 +11,13 @@ import {
   Container,
 } from "@material-ui/core";
 import ProductsHeader from "./ProductsHeader";
-import ProductsInStore from "src/__mocks__/ProductsInStore";
-const StoreProducts = () => {
+
+const StoreProducts = ({ products }) => {
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("Date");
-
+  console.log(products);
   function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
       return -1;
@@ -76,11 +73,11 @@ const StoreProducts = () => {
                 onRequestSort={handleRequestSort}
               />
               <TableBody>
-                {stableSort(ProductsInStore, getComparator(order, orderBy))
+                {stableSort(Array.from(products), getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={row.product_id}>
                         <TableCell
                           component="th"
                           scope="row"
@@ -88,34 +85,28 @@ const StoreProducts = () => {
                           align="center"
                         >
                           <a
-                            href={`/app/products/${row.id}`}
+                            href={`/app/products/${row.product_id}`}
                             style={{ color: "#1e88e5" }}
                           >
-                            {row.product}
+                            {row.Name}
                           </a>
                         </TableCell>
 
                         <TableCell align="center">
-                          {row.startQuantity}
+                          {row.StartQuantity}
                         </TableCell>
-                        <TableCell align="center">{row.soldQuantity}</TableCell>
-                        <TableCell align="center">{row.price}</TableCell>
+                        <TableCell align="center">{row.QuantitySold}</TableCell>
+                        <TableCell align="center">{row.PriceAtSale}</TableCell>
+                        <TableCell align="center">{row.revenue}</TableCell>
+
                         <TableCell align="center">
-                          {row.price * row.soldQuantity}
-                        </TableCell>
-                        <TableCell align="center">{row.foodCost}</TableCell>
-                        <TableCell align="center">
-                          {row.foodCost * row.startQuantity}
+                          {row.FoodCostAtSale}
                         </TableCell>
                         <TableCell align="center">
-                          {row.trashQuantity}
+                          {row.QuantityTrashed}
                         </TableCell>
-                        <TableCell align="center">
-                          {row.trashQuantity * row.foodCost}
-                        </TableCell>
-                        <TableCell align="center">
-                          {(row.price - row.foodCost) * row.soldQuantity}
-                        </TableCell>
+                        <TableCell align="center">{row.lost}</TableCell>
+                        <TableCell align="center">{row.profit}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -125,7 +116,7 @@ const StoreProducts = () => {
         </PerfectScrollbar>
         <TablePagination
           component="div"
-          count={ProductsInStore.length}
+          count={Array.from(products).length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

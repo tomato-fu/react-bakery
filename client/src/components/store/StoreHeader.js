@@ -15,19 +15,19 @@ import { visuallyHidden } from "@material-ui/utils";
 
 const headCells = [
   {
-    id: "date",
+    id: "Date",
     numeric: false,
     disablePadding: true,
     label: "Date",
   },
   {
-    id: "comment",
+    id: "Comment",
     numeric: false,
     disablePadding: true,
     label: "Comment",
   },
   {
-    id: "hours",
+    id: "Hours",
     numeric: true,
     disablePadding: true,
     label: "Hours",
@@ -84,7 +84,7 @@ function StoreHeader(props) {
           <TableCell
             key={headCell.id}
             align={"center"}
-            padding={headCell.disablePadding ? "none" : "normal"}
+            padding={headCell.disablePadding ? "none" : "default"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel

@@ -32,7 +32,7 @@ import {
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { Search as SearchIcon } from "react-feather";
+import SearchBar from "./SearchBar";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
 
@@ -105,48 +105,14 @@ const CustomerListToolbar = (props) => {
     update,
     setUpdate,
     setSelectedIds,
+    setKeyWord,
   } = props;
+
   const [open, setOpen] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [disable, setDisable] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-
-  const formik = useFormik({
-    initialValues: {
-      customerName: "",
-      weChatID: "",
-      phoneNumber: "",
-      joinDate: new Date(),
-      addressOne: "",
-      addressTwo: "",
-      city: "",
-      zipCode: "",
-      comment: "",
-    },
-    validationSchema: validationSchema,
-    onSubmit: () => {
-      setDisable(true);
-      axios
-        .post("http://localhost:3004/customers/createCustomer", {
-          customerName: formik.values.customerName,
-          wechatID: formik.values.weChatID,
-          phoneNumber: formik.values.phoneNumber,
-          joinDate: moment(formik.values.joinDate).format("YYYY-MM-DD"),
-          addressOne: formik.values.addressOne,
-          addressTwo: formik.values.addressTwo,
-          city: formik.values.city,
-          zip: formik.values.zipCode,
-          comment: formik.values.comment,
-        })
-        .then(() => {
-          setDisable(false);
-          setShowSuccess(true);
-          setUpdate(!update);
-        })
-        .catch(() => console.log("error"));
-    },
-  });
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -187,6 +153,44 @@ const CustomerListToolbar = (props) => {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const formik = useFormik({
+    initialValues: {
+      customerName: "",
+      weChatID: "",
+      phoneNumber: "",
+      joinDate: new Date(),
+      addressOne: "",
+      addressTwo: "",
+      city: "",
+      zipCode: "",
+      comment: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: () => {
+      setDisable(true);
+      axios
+        .post("http://localhost:3004/customers/createCustomer", {
+          customerName: formik.values.customerName,
+          wechatID: formik.values.weChatID,
+          phoneNumber: formik.values.phoneNumber,
+          joinDate: moment(formik.values.joinDate).format("YYYY-MM-DD"),
+          addressOne: formik.values.addressOne,
+          addressTwo: formik.values.addressTwo,
+          city: formik.values.city,
+          zip: formik.values.zipCode,
+          comment: formik.values.comment,
+        })
+        .then(() => {
+          setDisable(false);
+          setShowSuccess(true);
+          setUpdate(!update);
+          formik.resetForm();
+        })
+        .catch(() => console.log("error"));
+    },
+  });
+
   return (
     <Box sx={{ mb: 3 }}>
       <Box sx={{}}>
@@ -276,37 +280,7 @@ const CustomerListToolbar = (props) => {
       </Box>
 
       <Box sx={{ mt: 3 }}>
-        <Card>
-          <CardContent>
-            <Box sx={{ maxWidth: 500 }}>
-              <TextField
-                fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SvgIcon fontSize="small" color="action">
-                        <SearchIcon />
-                      </SvgIcon>
-                    </InputAdornment>
-                  ),
-                }}
-                placeholder="Search customer"
-                variant="outlined"
-                onKeyUp={(e) => {
-                  if (e.keyCode === 13) {
-                    e.preventDefault();
-                    setCustomers(
-                      customers.filter(
-                        (customer) => customer.address.country !== "USA"
-                      )
-                    );
-                    console.log("what the fu");
-                  }
-                }}
-              />
-            </Box>
-          </CardContent>
-        </Card>
+        <SearchBar setKeyWord={setKeyWord} />
       </Box>
 
       <div>
@@ -317,7 +291,7 @@ const CustomerListToolbar = (props) => {
           fullScreen={true}
         >
           <DialogTitle id="customized-dialog-title" onClose={handleClose}>
-            New customer
+            Edit customer
           </DialogTitle>
           <DialogContent
             dividers

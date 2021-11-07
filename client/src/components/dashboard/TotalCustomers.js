@@ -9,32 +9,35 @@ import {
 import { green } from "@material-ui/core/colors";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import PeopleIcon from "@material-ui/icons/PeopleOutlined";
+import { useTotalCustomerQuantityFetch } from "src/hooks/customer/useTotalCustomerQuantityFetch";
+const TotalCustomers = (props) => {
+  const { state, loading, error } = useTotalCustomerQuantityFetch();
 
-const TotalCustomers = (props) => (
-  <Card {...props}>
-    <CardContent>
-      <Grid container spacing={3} sx={{ justifyContent: "space-between" }}>
-        <Grid item>
-          <Typography color="textSecondary" gutterBottom variant="h6">
-            TOTAL CUSTOMERS
-          </Typography>
-          <Typography color="textPrimary" variant="h3">
-            600
-          </Typography>
+  return (
+    <Card {...props}>
+      <CardContent>
+        <Grid container spacing={3} sx={{ justifyContent: "space-between" }}>
+          <Grid item>
+            <Typography color="textSecondary" gutterBottom variant="h6">
+              TOTAL CUSTOMERS
+            </Typography>
+            <Typography color="textPrimary" variant="h3">
+              {state.quantity}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Avatar
+              sx={{
+                backgroundColor: green[600],
+                height: 56,
+                width: 56,
+              }}
+            >
+              <PeopleIcon />
+            </Avatar>
+          </Grid>
         </Grid>
-        <Grid item>
-          <Avatar
-            sx={{
-              backgroundColor: green[600],
-              height: 56,
-              width: 56,
-            }}
-          >
-            <PeopleIcon />
-          </Avatar>
-        </Grid>
-      </Grid>
-      <Box
+        {/* <Box
         sx={{
           alignItems: "center",
           display: "flex",
@@ -54,9 +57,9 @@ const TotalCustomers = (props) => (
         <Typography color="textSecondary" variant="caption">
           Since last month
         </Typography>
-      </Box>
-    </CardContent>
-  </Card>
-);
-
+      </Box> */}
+      </CardContent>
+    </Card>
+  );
+};
 export default TotalCustomers;

@@ -18,7 +18,13 @@ import Chip from "@mui/material/Chip";
 import OrdersListHeader from "./OrdersListHeader";
 import OrdersListToolbar from "./OrdersListToolbar";
 
-const OrdersListResults = ({ orders, ...rest }) => {
+const OrdersListResults = ({
+  orders,
+  setOrders,
+  update,
+  setUpdate,
+  setSearchTerm,
+}) => {
   const [selectOrderIDs, setSelectOrderIDs] = useState([]);
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
@@ -57,7 +63,7 @@ const OrdersListResults = ({ orders, ...rest }) => {
     let newSelectOrderIDs;
 
     if (event.target.checked) {
-      newSelectOrderIDs = orders.map((order) => order.id);
+      newSelectOrderIDs = orders.map((order) => order.order_id);
     } else {
       newSelectOrderIDs = [];
     }
@@ -105,9 +111,18 @@ const OrdersListResults = ({ orders, ...rest }) => {
   return (
     <Container maxWidth={false}>
       <Box>
-        <OrdersListToolbar numSelected={selectOrderIDs.length} />
+        <OrdersListToolbar
+          numSelected={selectOrderIDs.length}
+          selectedIds={selectOrderIDs}
+          setSelectedIds={setSelectOrderIDs}
+          orders={orders}
+          setOrders={setOrders}
+          update={update}
+          setUpdate={setUpdate}
+          setSearchTerm={setSearchTerm}
+        />
       </Box>
-      <Card {...rest}>
+      <Card>
         <PerfectScrollbar>
           <Box sx={{ minWidth: 1050 }}>
             <Table>
@@ -120,20 +135,22 @@ const OrdersListResults = ({ orders, ...rest }) => {
                 rowCount={orders.length}
               />
               <TableBody>
-                {stableSort(orders, getComparator(order, orderBy))
+                {stableSort(Array.from(orders), getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
+                    const isItemSelected = isSelected(row.order_id);
                     const labelId = `enhanced-table-checkbox-${index}`;
 
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleSelectOne(event, row.orderID)}
+                        onClick={(event) =>
+                          handleSelectOne(event, row.order_id)
+                        }
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.orderID}
+                        key={row.order_id}
                         selected={isItemSelected}
                       >
                         <TableCell padding="checkbox">
@@ -152,28 +169,36 @@ const OrdersListResults = ({ orders, ...rest }) => {
                           padding="none"
                           align="center"
                         >
-                          {row.orderID}
+                          <a
+                            href={`/app/orders/${row.order_id}`}
+                            style={{ color: "#1e88e5" }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {row.order_id}
+                          </a>
                         </TableCell>
-                        <TableCell align="center">{row.customer}</TableCell>
+                        <TableCell align="center">{row.CustomerName}</TableCell>
                         <TableCell align="center">
-                          {moment(row.pickTime).format("MM/DD/YYYY HH:mm:ss")}
+                          {moment(row.PickupTime).format("MM/DD/YYYY HH:mm:ss")}
                         </TableCell>
                         <TableCell align="center">
-                          {moment(row.placedDate).format("MM/DD/YYYY")}
+                          {moment(row.DatePlaced).format("MM/DD/YYYY")}
                         </TableCell>
                         <TableCell align="center">
-                          {row.fulfilled ? (
+                          {row.Fulfilled === 1 ? (
                             <Chip label="Yes" color="success" size="small" />
                           ) : (
                             <Chip label="No" color="error" size="small" />
                           )}
                         </TableCell>
-                        <TableCell align="center">{row.comment}</TableCell>
+                        <TableCell align="center">
+                          {row.Comment || "Null"}
+                        </TableCell>
                         <TableCell align="center">
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/orders/${row.id}`}
+                            href={`/app/orders/${row.order_id}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View
@@ -188,7 +213,7 @@ const OrdersListResults = ({ orders, ...rest }) => {
         </PerfectScrollbar>
         <TablePagination
           component="div"
-          count={orders.length}
+          count={Array.from(orders).length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

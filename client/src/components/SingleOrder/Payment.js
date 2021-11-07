@@ -15,13 +15,17 @@ import StoreIcon from "@material-ui/icons/Store";
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
 import LocalPizzaIcon from "@material-ui/icons/LocalPizza";
 import AccountBalanceWalletIcon from "@material-ui/icons/AccountBalanceWallet";
-const Payment = (props) => {
+
+const Payment = ({ payment }) => {
+  const amounts = Array.from(payment).map((item) => item.Amount);
+  const types = Array.from(payment).map((item) => item.Type);
+
   const theme = useTheme();
 
   const data = {
     datasets: [
       {
-        data: [50, 40, 10],
+        data: amounts,
         backgroundColor: [
           colors.indigo[500],
           colors.red[600],
@@ -32,7 +36,7 @@ const Payment = (props) => {
         hoverBorderColor: colors.common.white,
       },
     ],
-    labels: ["Cash", "Wechat", "Points"],
+    labels: types,
   };
 
   const options = {
@@ -78,14 +82,27 @@ const Payment = (props) => {
     },
   ];
 
+  const showcases = Array.from(payment).map((item) => {
+    if (item.Type === "Cash")
+      return { ...item, icon: AttachMoneyIcon, color: colors.indigo[500] };
+    if (item.Type === "WeChat")
+      return {
+        ...item,
+        icon: AccountBalanceWalletIcon,
+        color: colors.orange[500],
+      };
+    if (item.Type === "Reward Points")
+      return { ...item, icon: LocalPizzaIcon, color: colors.red[500] };
+  });
+
   return (
-    <Card {...props}>
+    <Card>
       <CardHeader title="Orders Summary" />
       <Divider />
       <CardContent>
         <Box
           sx={{
-            height: 170,
+            height: 250,
             position: "relative",
           }}
         >
@@ -98,9 +115,9 @@ const Payment = (props) => {
             pt: 2,
           }}
         >
-          {devices.map(({ color, icon: Icon, title, value }) => (
+          {showcases.map(({ color, icon: Icon, Type, Amount }) => (
             <Box
-              key={title}
+              key={Type}
               sx={{
                 p: 1,
                 textAlign: "center",
@@ -108,10 +125,10 @@ const Payment = (props) => {
             >
               <Icon color="action" />
               <Typography color="textPrimary" variant="body1">
-                {title}
+                {Type}
               </Typography>
               <Typography style={{ color }} variant="h2">
-                {value}%
+                {Amount}
               </Typography>
             </Box>
           ))}

@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet";
 import { Box, Container, Grid, Pagination } from "@material-ui/core";
 import ProductListToolbar from "src/components/product/ProductListToolbar";
 import ProductCard from "src/components/product//ProductCard";
-import { useProductsFetch } from "src/hooks/useProductsFetch";
+import { useProductsKeyWordFetch } from "src/hooks/product/useProductsKeyWordFetch";
 import React, { useState, useEffect } from "react";
 import { Alert } from "@material-ui/core";
 
@@ -14,7 +14,8 @@ const ProductList = () => {
     setState: setProducts,
     update,
     setUpdate,
-  } = useProductsFetch();
+    setKeyWord,
+  } = useProductsKeyWordFetch();
 
   const [showDelete, setShowDelete] = useState(false);
   useEffect(() => {
@@ -25,6 +26,13 @@ const ProductList = () => {
       clearTimeout(timeout);
     };
   }, [products]);
+
+  const item_per_page = 6;
+  const [page, setPage] = useState(1);
+  const count = Math.ceil(products.length / item_per_page);
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
   return (
     <>
       <Helmet>
@@ -44,19 +52,25 @@ const ProductList = () => {
             setProducts={setProducts}
             update={update}
             setUpdate={setUpdate}
+            setKeyWord={setKeyWord}
           />
           <Box sx={{ pt: 3 }}>
             <Grid container spacing={3}>
-              {products.map((product) => (
-                <Grid item key={product.ID} lg={4} md={6} xs={12}>
-                  <ProductCard
-                    product={product}
-                    update={update}
-                    setUpdate={setUpdate}
-                    setShowDelete={setShowDelete}
-                  />
-                </Grid>
-              ))}
+              {Array.from(products)
+                .slice(
+                  (page - 1) * item_per_page,
+                  (page - 1) * item_per_page + item_per_page
+                )
+                .map((product) => (
+                  <Grid item key={product.ID} lg={4} md={6} xs={12}>
+                    <ProductCard
+                      product={product}
+                      update={update}
+                      setUpdate={setUpdate}
+                      setShowDelete={setShowDelete}
+                    />
+                  </Grid>
+                ))}
             </Grid>
           </Box>
           <Box
@@ -66,7 +80,13 @@ const ProductList = () => {
               pt: 3,
             }}
           >
-            <Pagination color="primary" count={3} size="small" />
+            <Pagination
+              color="primary"
+              count={count}
+              page={page}
+              onChange={handlePageChange}
+              size="small"
+            />
           </Box>
         </Container>
       </Box>

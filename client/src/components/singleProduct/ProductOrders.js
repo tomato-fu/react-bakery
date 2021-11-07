@@ -15,8 +15,14 @@ import {
 } from "@material-ui/core";
 import customersOrder from "src/__mocks__/customersOrder";
 import CustomerOrdersHeader from "./CustomerOrdersHeader";
-
-const ProductOrders = () => {
+import { useSingleProductOrderFetch } from "src/hooks/product/useSingleProductOrderFetch";
+const ProductOrders = ({ productID }) => {
+  const {
+    state: orders,
+    loading,
+    error,
+  } = useSingleProductOrderFetch(productID);
+  console.log(orders);
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
@@ -77,24 +83,31 @@ const ProductOrders = () => {
                 onRequestSort={handleRequestSort}
               />
               <TableBody>
-                {stableSort(customersOrder, getComparator(order, orderBy))
+                {stableSort(Array.from(orders), getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={row.ID}>
                         <TableCell
                           component="th"
                           scope="row"
                           padding="none"
                           align="center"
                         >
-                          {row.orderID}
+                          <a
+                            href={`/app/orders/${row.ID}`}
+                            style={{ color: "#1e88e5" }}
+                          >
+                            {row.ID}
+                          </a>
                         </TableCell>
                         <TableCell align="center">
-                          {moment(row.Date).format("DD/MM/YYYY")}
+                          {moment(row.PickupTime).format("MM/DD/YYYY")}
                         </TableCell>
                         <TableCell align="center">{row.Amount}</TableCell>
-                        <TableCell align="center">{row.Comment}</TableCell>
+                        <TableCell align="center">
+                          {row.Comment || "Null"}
+                        </TableCell>
                         <TableCell align="center">
                           {row.Fulfilled ? "Yes" : "No"}
                         </TableCell>
@@ -102,7 +115,7 @@ const ProductOrders = () => {
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/${row.id}`}
+                            href={`/app/orders/${row.ID}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View
@@ -117,7 +130,7 @@ const ProductOrders = () => {
         </PerfectScrollbar>
         <TablePagination
           component="div"
-          count={customersOrder.length}
+          count={Array.from(orders).length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

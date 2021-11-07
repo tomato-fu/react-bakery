@@ -8,22 +8,15 @@ import {
   Typography,
 } from "@material-ui/core";
 import PerfectScrollbar from "react-perfect-scrollbar";
-const Comment = () => {
+const Comment = ({ text }) => {
   return (
     <Card sx={{ height: "100%" }}>
       <PerfectScrollbar>
-        <CardHeader title="Customer Comment" />
+        <CardHeader title="In-Store Comment" />
         <Divider />
         <CardContent>
           <Typography color="textSecondary" variant="h3">
-            Today is a good day!Today is a good day!Today is a good day!Today is
-            a good day!Today is a good day!Today is a good day!Today is a good
-            day!Today is a good day!Today is a good day!Today is a good
-            day!Today is a good day!Today is a good day!Today is a good
-            day!Today is a good day!Today is a good day!Today is a good
-            day!Today is a good day!Today is a good day!Today is a good
-            day!Today is a good day!Today is a good day!Today is a good
-            day!Today is a good day!
+            {text || "Null"}
           </Typography>
         </CardContent>
       </PerfectScrollbar>

@@ -11,14 +11,32 @@ import {
 } from "@material-ui/core";
 import LaptopMacIcon from "@material-ui/icons/LaptopMac";
 import StoreIcon from "@material-ui/icons/Store";
+import { useOrderQuantityFetch } from "src/hooks/product/useOrderQuantityFetch";
+import { useSaleQuantityFetch } from "src/hooks/product/useSaleQuantityFetch";
 
-const TotalOrder = (props) => {
+const TotalOrder = ({ productID }) => {
   const theme = useTheme();
+  const {
+    state: orderTotal,
+    loading: orderLoading,
+    error: orderError,
+  } = useOrderQuantityFetch(productID);
 
+  const {
+    state: saleTotal,
+    loading: saleLoading,
+    error: saleError,
+  } = useSaleQuantityFetch(productID);
+  let numOrder = 0;
+  let numSale = 0;
+  if (orderTotal !== undefined)
+    numOrder = orderTotal.total === undefined ? 0 : orderTotal.total;
+  if (saleTotal !== undefined)
+    numSale = saleTotal.total === undefined ? 0 : saleTotal.total;
   const data = {
     datasets: [
       {
-        data: [60, 40],
+        data: [numOrder, numSale],
         backgroundColor: [
           colors.indigo[500],
           colors.red[600],
@@ -57,20 +75,20 @@ const TotalOrder = (props) => {
   const devices = [
     {
       title: "Online",
-      value: 60,
+      value: numOrder,
       icon: LaptopMacIcon,
       color: colors.indigo[500],
     },
     {
       title: "In-store",
-      value: 40,
+      value: numSale,
       icon: StoreIcon,
       color: colors.red[600],
     },
   ];
 
   return (
-    <Card {...props}>
+    <Card>
       <CardHeader title="Product Summary" />
       <Divider />
       <CardContent>
@@ -102,7 +120,7 @@ const TotalOrder = (props) => {
                 {title}
               </Typography>
               <Typography style={{ color }} variant="h2">
-                {value}%
+                {value}
               </Typography>
             </Box>
           ))}

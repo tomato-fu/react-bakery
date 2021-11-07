@@ -18,12 +18,11 @@ import Chip from "@mui/material/Chip";
 import ProfitHeader from "./ProfitHeader";
 import ProfitToolbar from "./ProfitToolbar";
 import ProfitOverview from "./ProfitOverview";
-const ProfitResult = ({ profits, ...rest }) => {
-  const [selectOrderIDs, setSelectOrderIDs] = useState([]);
+const ProfitResult = ({ profits, setStartDate, setEndDate }) => {
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
-  const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("name");
+  const [order, setOrder] = useState("desc");
+  const [orderBy, setOrderBy] = useState("date");
 
   function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -53,40 +52,6 @@ const ProfitResult = ({ profits, ...rest }) => {
     return stabilizedThis.map((el) => el[0]);
   }
 
-  const handleSelectAll = (event) => {
-    let newSelectOrderIDs;
-
-    if (event.target.checked) {
-      newSelectOrderIDs = profits.map((order) => order.id);
-    } else {
-      newSelectOrderIDs = [];
-    }
-
-    setSelectOrderIDs(newSelectOrderIDs);
-  };
-
-  const isSelected = (id) => selectOrderIDs.indexOf(id) !== -1;
-
-  const handleSelectOne = (event, id) => {
-    const selectedIndex = selectOrderIDs.indexOf(id);
-    let newSelectOrderIDs = [];
-
-    if (selectedIndex === -1) {
-      newSelectOrderIDs = newSelectOrderIDs.concat(selectOrderIDs, id);
-    } else if (selectedIndex === 0) {
-      newSelectOrderIDs = newSelectOrderIDs.concat(selectOrderIDs.slice(1));
-    } else if (selectedIndex === selectOrderIDs.length - 1) {
-      newSelectOrderIDs = newSelectOrderIDs.concat(selectOrderIDs.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelectOrderIDs = newSelectOrderIDs.concat(
-        selectOrderIDs.slice(0, selectedIndex),
-        selectOrderIDs.slice(selectedIndex + 1)
-      );
-    }
-
-    setSelectOrderIDs(newSelectOrderIDs);
-  };
-
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value, 10));
     setPage(0);
@@ -105,17 +70,15 @@ const ProfitResult = ({ profits, ...rest }) => {
   return (
     <Container maxWidth={false}>
       <Box>
-        <ProfitToolbar numSelected={selectOrderIDs.length} />
+        <ProfitToolbar setStartDate={setStartDate} setEndDate={setEndDate} />
       </Box>
-      <Card {...rest}>
+      <Card>
         <PerfectScrollbar>
           <Box sx={{ minWidth: 1050 }}>
             <Table>
               <ProfitHeader
-                numSelected={selectOrderIDs.length}
                 order={order}
                 orderBy={orderBy}
-                onSelectAllClick={handleSelectAll}
                 onRequestSort={handleRequestSort}
                 rowCount={profits.length}
               />
@@ -123,22 +86,10 @@ const ProfitResult = ({ profits, ...rest }) => {
                 {stableSort(profits, getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
-                    const labelId = `enhanced-table-checkbox-${index}`;
-
                     return (
-                      <TableRow
-                        hover
-                        onClick={(event) => handleSelectOne(event, row.id)}
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={row.id}
-                        selected={isItemSelected}
-                      >
+                      <TableRow key={row.date}>
                         <TableCell
                           component="th"
-                          id={labelId}
                           scope="row"
                           padding="none"
                           align="center"
@@ -147,20 +98,17 @@ const ProfitResult = ({ profits, ...rest }) => {
                         </TableCell>
                         <TableCell align="center">{row.orderRevenue}</TableCell>
                         <TableCell align="center">{row.orderProfit}</TableCell>
-                        <TableCell align="center">{row.storeRevenue}</TableCell>
-                        <TableCell align="center">{row.storeProfit}</TableCell>
+                        <TableCell align="center">{row.saleRevenue}</TableCell>
+                        <TableCell align="center">{row.saleProfit}</TableCell>
 
-                        <TableCell align="center">
-                          {row.orderRevenue + row.storeRevenue}
-                        </TableCell>
-                        <TableCell align="center">
-                          {row.orderProfit + row.storeProfit}
-                        </TableCell>
+                        <TableCell align="center">{row.totalProfit}</TableCell>
+                        <TableCell align="center">{row.totalRevenue}</TableCell>
                         <TableCell align="center">
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/sales/123`}
+                            href={`/app/sales/${row.ID}`}
+                            disabled={row.ID === -1 ? true : false}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View
@@ -173,7 +121,7 @@ const ProfitResult = ({ profits, ...rest }) => {
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/orders`}
+                            href={`/app/ordersRanged/${row.date}/${row.date}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View

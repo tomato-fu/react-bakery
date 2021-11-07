@@ -2,10 +2,10 @@ import { Helmet } from "react-helmet";
 import { Box, Container } from "@material-ui/core";
 import IngredientsListResults from "src/components/ingredient/IngredientsListResults";
 import ingredients from "src/__mocks__/ingredients";
-import { useIngredientsFetch } from "src/hooks/useIngredientsFetch";
+import { useIngredientsKeyWordFetch } from "src/hooks/ingredient/useIngredientsKeyWordFetch";
 const IngredientsList = () => {
-  const { state, loading, error, setState, update, setUpdate } =
-    useIngredientsFetch();
+  const { state, loading, error, setState, update, setUpdate, setKeyWord } =
+    useIngredientsKeyWordFetch();
   return (
     <>
       <Helmet>
@@ -25,6 +25,7 @@ const IngredientsList = () => {
               setIngredients={setState}
               update={update}
               setUpdate={setUpdate}
+              setKeyWord={setKeyWord}
             />
           </Box>
         </Container>

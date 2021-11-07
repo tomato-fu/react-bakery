@@ -23,6 +23,7 @@ const IngredientsListResults = ({
   update,
   setUpdate,
   setIngredients,
+  setKeyWord,
 }) => {
   const [selectIngredientID, setSelectIngredientID] = useState([]);
   const [limit, setLimit] = useState(5);
@@ -125,6 +126,7 @@ const IngredientsListResults = ({
           setIngredients={setIngredients}
           update={update}
           setUpdate={setUpdate}
+          setKeyWord={setKeyWord}
         />
       </Box>
       <Card>
@@ -172,10 +174,18 @@ const IngredientsListResults = ({
                           padding="none"
                           align="center"
                         >
-                          {row.Name}
+                          <a
+                            href={`/app/ingredients/${row.ID}`}
+                            style={{ color: "#1e88e5" }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {row.Name}
+                          </a>
                         </TableCell>
                         <TableCell align="center">{row.PricePerKG}</TableCell>
-                        <TableCell align="center">{row.Note}</TableCell>
+                        <TableCell align="center">
+                          {row.Note || "Null"}
+                        </TableCell>
                         <TableCell align="center">
                           <Button
                             color="primary"

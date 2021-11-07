@@ -13,13 +13,28 @@ import LaptopMacIcon from "@material-ui/icons/LaptopMac";
 import PhoneIcon from "@material-ui/icons/Phone";
 import TabletIcon from "@material-ui/icons/Tablet";
 import StoreIcon from "@mui/icons-material/Store";
-const TrafficByDevice = (props) => {
+import { useTotalSalesQuantityFetch } from "src/hooks/sale/useTotalSalesQuantityFetch";
+import { useTotalOrdersQuantityFetch } from "src/hooks/order/useTotalOrdersQuantityFetch";
+const SalesDistribution = (props) => {
   const theme = useTheme();
-
+  const {
+    state: order,
+    loading: orderLoading,
+    error: orderError,
+  } = useTotalOrdersQuantityFetch();
+  const {
+    state: sale,
+    loading: saleLoading,
+    error: saleError,
+  } = useTotalSalesQuantityFetch();
+  const numOrder = order.ordersQuantity || 0;
+  const numSale = sale.salesQuantity || 0;
+  const orderPercent = Math.floor((numOrder / (numOrder + numSale)) * 100);
+  const salePercent = 100 - orderPercent;
   const data = {
     datasets: [
       {
-        data: [63, 37],
+        data: [numOrder, numSale],
         backgroundColor: [colors.indigo[500], colors.red[600]],
         borderWidth: 8,
         borderColor: colors.common.white,
@@ -54,13 +69,13 @@ const TrafficByDevice = (props) => {
   const devices = [
     {
       title: "Online",
-      value: 63,
+      value: orderPercent || 0,
       icon: LaptopMacIcon,
       color: colors.indigo[500],
     },
     {
       title: "In-Store",
-      value: 37,
+      value: salePercent || 0,
       icon: StoreIcon,
       color: colors.red[600],
     },
@@ -109,4 +124,4 @@ const TrafficByDevice = (props) => {
   );
 };
 
-export default TrafficByDevice;
+export default SalesDistribution;

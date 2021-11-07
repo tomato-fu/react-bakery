@@ -17,8 +17,15 @@ import {
 import StoreHeader from "./StoreHeader";
 import StoreToolbar from "./StoreToolbar";
 
-const StoreResult = ({ sales, ...rest }) => {
-  const [selectOrderIDs, setSelectOrderIDs] = useState([]);
+const StoreResult = ({
+  sales,
+  setSales,
+  update,
+  setUpdate,
+  setStartDate,
+  setEndDate,
+}) => {
+  const [selectSaleIDs, setSelectSaleIDs] = useState([]);
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
@@ -56,34 +63,34 @@ const StoreResult = ({ sales, ...rest }) => {
     let newSelectOrderIDs;
 
     if (event.target.checked) {
-      newSelectOrderIDs = sales.map((order) => order.id);
+      newSelectOrderIDs = sales.map((sale) => sale.ID);
     } else {
       newSelectOrderIDs = [];
     }
 
-    setSelectOrderIDs(newSelectOrderIDs);
+    setSelectSaleIDs(newSelectOrderIDs);
   };
 
-  const isSelected = (id) => selectOrderIDs.indexOf(id) !== -1;
+  const isSelected = (id) => selectSaleIDs.indexOf(id) !== -1;
 
   const handleSelectOne = (event, id) => {
-    const selectedIndex = selectOrderIDs.indexOf(id);
+    const selectedIndex = selectSaleIDs.indexOf(id);
     let newSelectOrderIDs = [];
 
     if (selectedIndex === -1) {
-      newSelectOrderIDs = newSelectOrderIDs.concat(selectOrderIDs, id);
+      newSelectOrderIDs = newSelectOrderIDs.concat(selectSaleIDs, id);
     } else if (selectedIndex === 0) {
-      newSelectOrderIDs = newSelectOrderIDs.concat(selectOrderIDs.slice(1));
-    } else if (selectedIndex === selectOrderIDs.length - 1) {
-      newSelectOrderIDs = newSelectOrderIDs.concat(selectOrderIDs.slice(0, -1));
+      newSelectOrderIDs = newSelectOrderIDs.concat(selectSaleIDs.slice(1));
+    } else if (selectedIndex === selectSaleIDs.length - 1) {
+      newSelectOrderIDs = newSelectOrderIDs.concat(selectSaleIDs.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelectOrderIDs = newSelectOrderIDs.concat(
-        selectOrderIDs.slice(0, selectedIndex),
-        selectOrderIDs.slice(selectedIndex + 1)
+        selectSaleIDs.slice(0, selectedIndex),
+        selectSaleIDs.slice(selectedIndex + 1)
       );
     }
 
-    setSelectOrderIDs(newSelectOrderIDs);
+    setSelectSaleIDs(newSelectOrderIDs);
   };
 
   const handleLimitChange = (event) => {
@@ -104,14 +111,24 @@ const StoreResult = ({ sales, ...rest }) => {
   return (
     <Container maxWidth={false}>
       <Box>
-        <StoreToolbar numSelected={selectOrderIDs.length} />
+        <StoreToolbar
+          numSelected={selectSaleIDs.length}
+          selectedIds={selectSaleIDs}
+          setSelectedIds={setSelectSaleIDs}
+          sales={sales}
+          setSales={setSales}
+          update={update}
+          setUpdate={setUpdate}
+          setEndDate={setEndDate}
+          setStartDate={setStartDate}
+        />
       </Box>
-      <Card {...rest}>
+      <Card>
         <PerfectScrollbar>
           <Box sx={{ minWidth: 1050 }}>
             <Table>
               <StoreHeader
-                numSelected={selectOrderIDs.length}
+                numSelected={selectSaleIDs.length}
                 order={order}
                 orderBy={orderBy}
                 onSelectAllClick={handleSelectAll}
@@ -122,17 +139,17 @@ const StoreResult = ({ sales, ...rest }) => {
                 {stableSort(sales, getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
+                    const isItemSelected = isSelected(row.ID);
                     const labelId = `enhanced-table-checkbox-${index}`;
 
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleSelectOne(event, row.id)}
+                        onClick={(event) => handleSelectOne(event, row.ID)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.id}
+                        key={row.ID}
                         selected={isItemSelected}
                       >
                         <TableCell padding="checkbox">
@@ -150,10 +167,18 @@ const StoreResult = ({ sales, ...rest }) => {
                           padding="none"
                           align="center"
                         >
-                          {moment(row.date).format("MM/DD/YYYY")}
+                          <a
+                            href={`/app/sales/${row.ID}`}
+                            style={{ color: "#1e88e5" }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {moment(row.Date).format("MM/DD/YYYY")}
+                          </a>
                         </TableCell>
-                        <TableCell align="center">{row.comment}</TableCell>
-                        <TableCell align="center">{row.hours}</TableCell>
+                        <TableCell align="center">
+                          {row.Comment || "Null"}
+                        </TableCell>
+                        <TableCell align="center">{row.Hours}</TableCell>
                         <TableCell align="center">{row.revenue}</TableCell>
                         <TableCell align="center">{row.profit}</TableCell>
 
@@ -161,7 +186,7 @@ const StoreResult = ({ sales, ...rest }) => {
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/sales/${row.id}`}
+                            href={`/app/sales/${row.ID}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View

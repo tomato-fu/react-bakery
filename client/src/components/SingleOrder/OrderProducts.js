@@ -15,12 +15,12 @@ import {
 } from "@material-ui/core";
 import ProductsHeader from "./ProductsHeader";
 import ProductsInOrder from "src/__mocks__/ProductsInOrder";
-
-const OrderProducts = () => {
+import { useSingleOrderProductFetch } from "src/hooks/order/useSingleOrderProductFetch";
+const OrderProducts = ({ products }) => {
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("Date");
+  const [orderBy, setOrderBy] = useState("product");
 
   function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -77,30 +77,37 @@ const OrderProducts = () => {
                 onRequestSort={handleRequestSort}
               />
               <TableBody>
-                {stableSort(ProductsInOrder, getComparator(order, orderBy))
+                {stableSort(Array.from(products), getComparator(order, orderBy))
                   .slice(page * limit, page * limit + limit)
                   .map((row, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={row.product_id}>
                         <TableCell
                           component="th"
                           scope="row"
                           padding="none"
                           align="center"
                         >
-                          {row.name}
+                          <a
+                            href={`/app/products/${row.product_id}`}
+                            style={{ color: "#1e88e5" }}
+                          >
+                            {row.Name}
+                          </a>
                         </TableCell>
 
-                        <TableCell align="center">{row.price}</TableCell>
-                        <TableCell align="center">{row.quantity}</TableCell>
-                        <TableCell align="center">{row.total}</TableCell>
-                        <TableCell align="center">{row.comment}</TableCell>
+                        <TableCell align="center">{row.PriceAtSale}</TableCell>
+                        <TableCell align="center">{row.Quantity}</TableCell>
+                        <TableCell align="center">{row.Total}</TableCell>
+                        <TableCell align="center">
+                          {row.Comment === "" ? "Null" : row.Comment}
+                        </TableCell>
 
                         <TableCell align="center">
                           <Button
                             color="primary"
                             variant="contained"
-                            href={`/app/products/${row.id}`}
+                            href={`/app/products/${row.product_id}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View
@@ -115,7 +122,7 @@ const OrderProducts = () => {
         </PerfectScrollbar>
         <TablePagination
           component="div"
-          count={ProductsInOrder.length}
+          count={Array.from(products).length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

@@ -2,8 +2,8 @@ import { Avatar, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { indigo } from "@material-ui/core/colors";
 
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
-const TotalPayment = (props) => (
-  <Card {...props}>
+const TotalPayment = ({ amount }) => (
+  <Card>
     <CardContent>
       <Grid container spacing={3} sx={{ justifyContent: "space-between" }}>
         <Grid item>
@@ -11,7 +11,7 @@ const TotalPayment = (props) => (
             Total Payment Amount
           </Typography>
           <Typography color="textSecondary" variant="h3">
-            $121
+            ${amount}
           </Typography>
         </Grid>
         <Grid item>

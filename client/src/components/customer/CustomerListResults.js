@@ -23,6 +23,8 @@ const CustomerListResults = ({
   setCustomers,
   update,
   setUpdate,
+  keyWord,
+  setKeyWord,
 }) => {
   const [selectedCustomerIds, setSelectedCustomerIds] = useState([]);
   const [limit, setLimit] = useState(5);
@@ -125,6 +127,8 @@ const CustomerListResults = ({
           setCustomers={setCustomers}
           update={update}
           setUpdate={setUpdate}
+          keyWord={keyWord}
+          setKeyWord={setKeyWord}
         />
       </Box>
       <Card>
@@ -172,7 +176,13 @@ const CustomerListResults = ({
                           padding="none"
                           align="center"
                         >
-                          {row.CustomerName}
+                          <a
+                            href={`/app/customers/${row.ID}`}
+                            style={{ color: "#1e88e5" }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {row.CustomerName}
+                          </a>
                         </TableCell>
                         <TableCell align="center">{row.WeChatID}</TableCell>
                         <TableCell align="center">{`${row.addressOne}, ${row.addressTwo}`}</TableCell>

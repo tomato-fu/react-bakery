@@ -9,8 +9,12 @@ import {
   Menu,
   MenuItem,
   Grid,
+  Button,
   Typography,
+  withStyles,
 } from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
+
 import AccessTimeIcon from "@material-ui/icons/AccessTime";
 import WhatshotIcon from "@material-ui/icons/Whatshot";
 import yellow from "@material-ui/core/colors/yellow";
@@ -20,11 +24,62 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import axios from "axios";
+import Dialog from "@material-ui/core/Dialog";
+
+import MuiDialogTitle from "@material-ui/core/DialogTitle";
+import MuiDialogContent from "@material-ui/core/DialogContent";
+import MuiDialogActions from "@material-ui/core/DialogActions";
+import DialogContentText from "@mui/material/DialogContentText";
+
+const styles = (theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(2),
+  },
+});
+
+const DialogTitle = withStyles(styles)((props) => {
+  const { children, classes, onClose, ...other } = props;
+  return (
+    <MuiDialogTitle disableTypography className={classes.root} {...other}>
+      <Typography variant="h4" sx={{ fontSize: "1.5em" }}>
+        {children}
+      </Typography>
+      {onClose ? (
+        <IconButton
+          aria-label="close"
+          sx={{
+            position: "absolute",
+            right: "1rem",
+            top: "0.1rem",
+          }}
+          onClick={onClose}
+        >
+          <CloseIcon />
+        </IconButton>
+      ) : null}
+    </MuiDialogTitle>
+  );
+});
+
+const DialogContent = withStyles((theme) => ({
+  root: {
+    padding: theme.spacing(2),
+  },
+}))(MuiDialogContent);
+
+const DialogActions = withStyles((theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(1),
+  },
+}))(MuiDialogActions);
+
 const ProductCard = ({ product, update, setUpdate, setShowDelete }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   // const [showPin, setShowPin] = useState(product.isPin);
   const open = Boolean(anchorEl);
-  console.log(product);
+  const [openDelete, setOpenDelete] = useState(false);
   const handleRemove = (id) => {
     axios
       .delete("http://localhost:3004/products/deleteProduct", {
@@ -36,7 +91,7 @@ const ProductCard = ({ product, update, setUpdate, setShowDelete }) => {
         setUpdate(!update);
       })
       .catch((err) => console.log(err));
-    setAnchorEl(null);
+
     setShowDelete(true);
   };
   // const handlePin = (id) => {
@@ -59,6 +114,36 @@ const ProductCard = ({ product, update, setUpdate, setShowDelete }) => {
           style={{ position: "absolute", left: "1rem", top: "0.8rem" }}
         />
       )} */}
+
+      <Dialog
+        open={openDelete}
+        onClose={() => setOpenDelete(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Warning, this operation cannot be reversed!"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete those data? Once you press "yes", it
+            cannot be restored.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              handleRemove(product.ID);
+              setOpenDelete(false);
+              setAnchorEl(null);
+            }}
+            style={{ color: "#f44336" }}
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Box sx={{ position: "absolute", right: "1rem", top: "0.8rem" }}>
         <IconButton
@@ -91,7 +176,7 @@ const ProductCard = ({ product, update, setUpdate, setShowDelete }) => {
         */}
           <MenuItem
             key="remove"
-            onClick={() => handleRemove(product.ID)}
+            onClick={() => setOpenDelete(true)}
             sx={{ color: "#f44336" }}
           >
             Remove
@@ -135,7 +220,7 @@ const ProductCard = ({ product, update, setUpdate, setShowDelete }) => {
               display: "flex",
             }}
           >
-            {/* {product.isFire ? (
+            {product.isHot ? (
               <Box
                 sx={{
                   display: "flex",
@@ -152,19 +237,7 @@ const ProductCard = ({ product, update, setUpdate, setShowDelete }) => {
                   Popular Product
                 </Typography>
               </Box>
-            ) : (
-              <Box>
-                <AccessTimeIcon color="action" />
-                <Typography
-                  color="textSecondary"
-                  display="inline"
-                  sx={{ pl: 1 }}
-                  variant="body2"
-                >
-                  Updated 2hr ago
-                </Typography>
-              </Box>
-            )} */}
+            ) : null}
           </Grid>
           <Grid
             item
@@ -180,7 +253,7 @@ const ProductCard = ({ product, update, setUpdate, setShowDelete }) => {
               sx={{ pl: 1 }}
               variant="body2"
             >
-              123 Orders
+              {product.total} orders
             </Typography>
           </Grid>
         </Grid>

@@ -15,37 +15,37 @@ import { visuallyHidden } from "@material-ui/utils";
 
 const headCells = [
   {
-    id: "orderID",
+    id: "order_id",
     numeric: false,
     disablePadding: true,
     label: "Order ID",
   },
   {
-    id: "customer",
+    id: "CustomerName",
     numeric: false,
     disablePadding: true,
     label: "Customer",
   },
   {
-    id: "pickTime",
+    id: "PickupTime",
     numeric: false,
     disablePadding: true,
     label: "Pickup Time",
   },
   {
-    id: "placedDate",
+    id: "DatePlaced",
     numeric: false,
     disablePadding: true,
     label: "Date Placed",
   },
   {
-    id: "fulfilled",
+    id: "Fulfilled",
     numeric: false,
     disablePadding: true,
     label: "Fulfilled",
   },
   {
-    id: "comment",
+    id: "Comment",
     numeric: false,
     disablePadding: true,
     label: "Comment",

@@ -10,8 +10,6 @@ import {
   CardHeader,
 } from "@material-ui/core";
 
-import { useParams } from "react-router";
-
 import { blue } from "@material-ui/core/colors";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -22,8 +20,9 @@ import AlarmOnIcon from "@material-ui/icons/AlarmOn";
 import AddAlarmIcon from "@material-ui/icons/AddAlarm";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import DoneIcon from "@material-ui/icons/Done";
-const SingleOrderHeader = () => {
-  const { orderID } = useParams();
+
+import moment from "moment";
+const SingleOrderHeader = ({ order }) => {
   return (
     <Card sx={{ height: "100%" }}>
       <CardHeader title="Order Info" />
@@ -39,7 +38,7 @@ const SingleOrderHeader = () => {
               Customer:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              Josh Wang
+              {order.CustomerName}
             </Typography>
           </Grid>
           <Grid item>
@@ -65,7 +64,7 @@ const SingleOrderHeader = () => {
               Placed Date:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              09/12/2021
+              {moment(order.DatePlaced).format("YYYY-MM-DD")}
             </Typography>
           </Grid>
           <Grid item>
@@ -91,7 +90,7 @@ const SingleOrderHeader = () => {
               Pickup Time:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              09/13/2021 15:31
+              {moment(order.PickupTime).format("YYYY-MM-DD HH:mm")}
             </Typography>
           </Grid>
           <Grid item>
@@ -117,7 +116,7 @@ const SingleOrderHeader = () => {
               Location:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              Uptown Rd 12A
+              {order.location}
             </Typography>
           </Grid>
           <Grid item>
@@ -143,7 +142,7 @@ const SingleOrderHeader = () => {
               Fulfilled:
             </Typography>
             <Typography color="#f05a46" variant="h4">
-              No
+              {order.Fulfilled === 0 ? "No" : "Yes"}
             </Typography>
           </Grid>
           <Grid item>

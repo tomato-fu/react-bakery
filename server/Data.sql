@@ -32,6 +32,7 @@ CREATE TABLE `Order`(
     PickupTime        DATETIME NOT NULL,
     Fulfilled         INT NOT NULL,
     Comment           VARCHAR(2048),
+    Amount            DECIMAL(8,2) NOT NULL,
     PRIMARY KEY (ID),
     FOREIGN KEY (Customer_ID) REFERENCES Customer(ID) 
         ON DELETE CASCADE
@@ -61,7 +62,7 @@ CREATE TABLE Payment(
     order_id          INT UNSIGNED NOT NULL,
     Payment_Type_ID   INT UNSIGNED NOT NULL,
     Amount            DECIMAL(8,2) NOT NULL,
-    PRIMARY KEY (order_id),
+    PRIMARY KEY (order_id, Payment_Type_ID),
     FOREIGN KEY (order_id) REFERENCES `Order`(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
@@ -110,6 +111,7 @@ CREATE TABLE Order_Details(
 CREATE TABLE Sales_Report(
     ID                INT UNSIGNED NOT NULL AUTO_INCREMENT,
     Date              DATE NOT NULL UNIQUE,
+    Hours             INT,
     Comment           VARCHAR(8048),
     PRIMARY KEY (ID)
 )Engine=InnoDB;
@@ -180,15 +182,83 @@ CREATE TABLE Recipe_Ingredient(
 
 
 DELIMITER &&
-CREATE PROCEDURE fetch_orders_in_range(IN startDate DATE, in endDate DATE)
+CREATE PROCEDURE fetch_orders_in_range(IN startDate DATE, IN endDate DATE, IN keyWord VARCHAR(52))
 BEGIN
 		SELECT
-			o.ID as order_id, Customer_ID, Username, DatePlaced, PickupTime, Fulfilled, o.Comment
+			o.ID as order_id, Customer_ID, CustomerName, DatePlaced, PickupTime, Fulfilled, o.Comment
 		FROM `Order` o
 		JOIN Customer c ON c.ID = o.Customer_ID
+        WHERE DatePlaced >= startDate AND DatePlaced <= endDate AND (CustomerName LIKE CONCAT('%', keyWord, '%') OR o.Comment LIKE CONCAT('%',keyWord,'%'))
+        ORDER BY DatePlaced DESC;
+END &&
+
+DELIMITER &&
+CREATE PROCEDURE fetch_all_sales_in_range(IN startDate DATE, IN endDate DATE)
+BEGIN
+		SELECT *
+		FROM Sales_Report sp
+        WHERE sp.Date >= startDate AND sp.Date <= endDate 
+        ORDER BY sp.Date DESC;
+END &&
+
+DELIMITER &&
+CREATE PROCEDURE fetch_sales_in_range(IN startDate DATE, IN endDate DATE)
+BEGIN
+        SELECT 
+            s.ID as report_id, 
+            s.Date,
+            s.Comment,
+            s.Hours, 
+            sum(QuantitySold * ( PriceAtSale - FoodCostAtSale) - QuantityTrashed * FoodCostAtSale) as profit, 
+            sum(QuantitySold * PriceAtSale) as revenue
+		FROM Sales_Report s
+		JOIN Sales_Report_Details spd  ON Sales_Report_ID = s.ID
+		JOIN Product p ON product_id = p.ID
         WHERE DatePlaced >= startDate AND DatePlaced <= endDate
+		GROUP BY report_id, Date
+		ORDER BY Date DESC;
+END &&
+
+DELIMITER &&
+CREATE PROCEDURE fetch_customers_keyword(IN keyWord VARCHAR(52))
+BEGIN
+		SELECT *
+		FROM Customer c
+        WHERE CustomerName LIKE CONCAT('%', keyWord, '%') 
+        OR WeChatID LIKE CONCAT('%',keyWord,'%') 
+        OR phoneNumber LIKE CONCAT('%',keyWord,'%') 
+        OR addressOne LIKE CONCAT('%',keyWord,'%') 
+        ORDER BY joinDate DESC;
+END &&
+
+DELIMITER &&
+CREATE PROCEDURE fetch_ingredients_keyword(IN keyWord VARCHAR(52))
+BEGIN
+		SELECT *
+		FROM Ingredient i
+        WHERE i.Name LIKE CONCAT('%', keyWord, '%') 
+        OR i.PricePerKG LIKE CONCAT('%',keyWord,'%') 
+        OR i.Note LIKE CONCAT('%',keyWord,'%');
+END &&
+
+DELIMITER &&
+CREATE PROCEDURE fetch_products_keyword(IN keyWord VARCHAR(52))
+BEGIN
+		SELECT *
+        FROM Product p
+        WHERE p.Name LIKE CONCAT('%', keyWord, '%') 
+        OR p.Comment LIKE CONCAT('%',keyWord,'%');
+END &&
+
+DELIMITER &&
+CREATE PROCEDURE fetch_all_orders()
+BEGIN
+		SELECT
+			o.ID as order_id, Customer_ID, CustomerName, DatePlaced, PickupTime, Fulfilled, o.Comment
+		FROM `Order` o
+		JOIN Customer c ON c.ID = o.Customer_ID
 		ORDER BY PickupTime;
-	END &&
+END &&
 
 CREATE PROCEDURE fetch_select_orders_in_range(IN bool INT, IN startDate DATE, in endDate DATE)
 BEGIN
@@ -198,12 +268,12 @@ BEGIN
 		JOIN Customer c ON c.ID = o.Customer_ID
         WHERE Fulfilled = bool AND DatePlaced >= startDate AND DatePlaced <= endDate
 		ORDER BY PickupTime;
-	END &&
+END &&
 
 CREATE PROCEDURE fetch_single_order(IN id INT)
 BEGIN
     SELECT
-        o.ID as order_id, Customer_ID, Username, DatePlaced, PickupTime, Fulfilled, o.Comment
+        o.ID as order_id, Customer_ID, CustomerName, DatePlaced, PickupTime, Fulfilled, o.Comment,o.Amount,CONCAT(c.addressOne," ",c.addressTwo) AS location
     FROM `Order` o
     JOIN Customer c ON c.ID = o.Customer_ID
     WHERE o.ID = id;
@@ -212,7 +282,7 @@ END &&
 CREATE PROCEDURE fetch_single_order_details(IN id INT)
 BEGIN
     SELECT
-        product_id, Name, PriceAtSale, Quantity, od.Comment 
+        product_id, Name, PriceAtSale, Quantity, od.Comment , (PriceAtSale * Quantity) AS Total
     FROM Order_Details od
     JOIN `Order` o ON o.ID = od.order_id
     JOIN Product p ON p.ID = od.product_id
@@ -220,10 +290,21 @@ BEGIN
     ORDER BY Name;
 END &&
 
+CREATE PROCEDURE fetch_single_order_payments(IN id INT)
+BEGIN
+    SELECT
+        pt.ID,Type, pm.Amount
+    FROM Payment pm
+    JOIN `Order` o ON o.ID = pm.order_id
+    JOIN Payment_Type pt ON pt.ID = pm.Payment_Type_ID
+    WHERE order_id = id
+    ORDER BY Type;
+END &&
+
 CREATE PROCEDURE fetch_single_order_detail(IN o_id INT, IN p_id INT)
 BEGIN
     SELECT
-        product_id, Name, PriceAtSale, Quantity, od.Comment 
+        product_id, Name, PriceAtSale, Quantity, od.Comment , (PriceAtSale * Quantity) AS Total
     FROM Order_Details od
     JOIN `Order` o ON o.ID = od.order_id
     JOIN Product p ON p.ID = od.product_id
@@ -250,35 +331,35 @@ BEGIN
     GROUP BY order_id;
 END &&
 
-CREATE PROCEDURE fetch_customer_favorite(IN cust_id INT)
+CREATE PROCEDURE fetch_customer_favorites(IN cust_id INT)
 BEGIN
-	SELECT 
-    p.ID as product_id, p.Name as favorite, MAX(Total) as total
-	FROM(
-		SELECT
-			c.ID as id,
-			p.Name as name,
-			SUM(od.Quantity) as total
-		FROM Customer c
-			JOIN `Order` o ON c.ID = o.Customer_ID
-			JOIN Order_Details od ON o.ID = od.order_id
-			JOIN Product p ON od.product_id = p.ID
+SELECT
+	c.ID as id,
+	p.Name as name,
+	SUM(od.Quantity) as total
+		FROM bakery.Customer c
+			JOIN bakery.`Order` o ON c.ID = o.Customer_ID
+			JOIN bakery.Order_Details od ON o.ID = od.order_id
+			JOIN bakery.Product p ON od.product_id = p.ID
 		WHERE c.ID = cust_id
 		GROUP BY
 			c.ID, p.Name
-            ) as sub
-	JOIN Customer c ON sub.id = c.id
-	JOIN Product p ON sub.name = p.Name
-	GROUP BY sub.id;
+		ORDER BY total DESC
+        limit 7;
 END &&
 
 CREATE PROCEDURE fetch_customer_points(IN cust_id INT)
 BEGIN
-	SELECT 
-    IFNULL((SELECT SUM(Amount) as total FROM Payment WHERE Payment_Type_ID != 3), 0)as gained,
-    IFNULL((SELECT SUM(Amount) as total FROM Payment WHERE Payment_Type_ID = 3), 0) as spent
-    FROM `Order` o
-    WHERE Customer_ID = cust_id;
+SELECT min(ID) as ID, sum(total) as total
+    FROM(
+        SELECT pt.ID ,sum(p.Amount) as total
+        From bakery.Customer c
+            JOIN bakery.`Order` o ON o.Customer_ID = c.ID
+            JOIN bakery.Payment p ON p.order_id = o.ID
+            JOIN bakery.Payment_Type pt ON pt.ID = p.Payment_Type_ID
+            WHERE c.ID = cust_id
+            GROUP BY pt.ID) as T
+GROUP BY (case when ID in (1,2) then 1 else ID end);
 END &&
 
 CREATE PROCEDURE fetch_customer_info(IN cust_id INT)
@@ -297,7 +378,7 @@ END &&
 
 CREATE PROCEDURE fetch_ingredient_products(IN ing_id INT)
 BEGIN
-SELECT p.ID, p.Name, p.price, p.FoodCost, p.TimeCost, ri.grams, r.ItemsProduced
+SELECT p.ID, p.Name, p.price, p.FoodCost, p.TimeCost, ri.grams
 FROM Product p
 JOIN Recipe r ON r.product_id = p.ID 
 JOIN Recipe_Ingredient ri ON ri.Recipe_ID = r.product_id
@@ -325,23 +406,125 @@ BEGIN
     WHERE r.product_id = prod_id;
 END &&
 
+CREATE PROCEDURE fetch_product_quantity(IN prod_id INT)
+BEGIN
+SELECT
+	p.Name as name,
+	SUM(od.Quantity) as total
+		FROM bakery.Product p
+			JOIN bakery.Order_Details od ON p.ID = od.product_id
+            JOIN bakery.`Order` o ON o.ID = od.order_id
+		WHERE p.ID = prod_id
+		GROUP BY
+			p.Name;
+END &&
+
+CREATE PROCEDURE fetch_product_quantity_sale(IN prod_id INT)
+BEGIN
+SELECT
+	p.Name as name,
+	SUM(spd.QuantitySold) as total
+		FROM bakery.Product p
+			JOIN Sales_Report_Details spd ON spd.product_id= p.ID
+		WHERE p.ID = prod_id
+		GROUP BY
+			p.Name;
+END &&
+
+CREATE PROCEDURE fetch_product_quantity_Keyword(IN keyWord VARCHAR(52))
+BEGIN
+SELECT 
+    p.ID,
+	p.Name as name,
+	SUM(od.Quantity) as total
+		FROM bakery.Product p
+			JOIN bakery.Order_Details od ON p.ID = od.product_id
+            JOIN bakery.`Order` o ON o.ID = od.order_id
+		WHERE p.Name LIKE CONCAT('%', keyWord, '%') 
+            OR p.Comment LIKE CONCAT('%',keyWord,'%')
+		GROUP BY
+			p.Name,p.ID;
+END &&
+
+CREATE PROCEDURE fetch_product_top_customer(IN prod_id INT)
+BEGIN
+SELECT
+	c.CustomerName,
+	SUM(od.Quantity) as total
+		FROM bakery.Customer c
+			JOIN bakery.`Order` o ON c.ID = o.Customer_ID
+			JOIN bakery.Order_Details od ON o.ID = od.order_id
+			JOIN bakery.Product p ON od.product_id = p.ID
+		WHERE p.ID = prod_id
+		GROUP BY
+			c.CustomerName
+		ORDER BY total DESC
+        limit 7;
+END &&
+
+CREATE PROCEDURE fetch_product_orders(IN prod_id INT)
+BEGIN
+SELECT
+    o.ID,
+    o.PickupTime,
+    o.Amount,
+    o.Comment,
+    o.Fulfilled
+		FROM bakery.`Order` o
+			JOIN bakery.Order_Details od ON o.ID = od.order_id
+			JOIN bakery.Product p ON od.product_id = p.ID
+		WHERE p.ID = prod_id
+        ORDER BY PickupTime;
+END &&
+
 CREATE PROCEDURE fetch_all_sales()
 BEGIN
-    SELECT s.ID as Sales_ID, Date, Comment
-    FROM Sales_Report s
-    ORDER BY Date DESC;
+    SELECT 
+            s.ID as report_id, 
+            s.Date,
+            s.Comment,
+            s.Hours, 
+            sum(QuantitySold * ( PriceAtSale - FoodCostAtSale) - QuantityTrashed * FoodCostAtSale) as profit, 
+            sum(QuantitySold * PriceAtSale) as revenue
+		FROM Sales_Report s
+		JOIN Sales_Report_Details spd  ON Sales_Report_ID = s.ID
+		JOIN Product p ON product_id = p.ID
+		GROUP BY report_id, Date
+		ORDER BY Date DESC;
 END &&
 
 CREATE PROCEDURE fetch_single_sale(IN id INT)
 BEGIN
-    SELECT s.ID as Sales_ID, Date, Comment
-    FROM Sales_Report s
-    WHERE s.ID = id;
+     SELECT 
+            s.ID as report_id, 
+            s.Date,
+            s.Comment,
+            s.Hours, 
+            sum(QuantitySold * ( PriceAtSale - FoodCostAtSale) - QuantityTrashed * FoodCostAtSale) as profit, 
+            sum(QuantitySold * PriceAtSale) as revenue,
+            sum(QuantityTrashed * FoodCostAtSale) as lost
+		FROM Sales_Report s
+		JOIN Sales_Report_Details spd  ON Sales_Report_ID = s.ID
+		JOIN Product p ON product_id = p.ID
+        WHERE s.ID = id
+		GROUP BY report_id, Date
+		ORDER BY Date DESC;
 END &&
+
+
 
 CREATE PROCEDURE fetch_single_sale_details(IN id INT)
 BEGIN
-    SELECT spd.product_id, Name, PriceAtSale, StartQuantity, QuantitySold, QuantityTrashed, FoodCostAtSale
+    SELECT  spd.product_id, 
+            Name, 
+            PriceAtSale, 
+            StartQuantity, 
+            QuantitySold, 
+            QuantityTrashed, 
+            FoodCostAtSale,
+            QuantitySold * ( PriceAtSale - FoodCostAtSale) - QuantityTrashed * FoodCostAtSale as profit,
+            QuantitySold * PriceAtSale as revenue,
+            QuantityTrashed * FoodCostAtSale as lost
     FROM Sales_Report_Details spd
     JOIN Sales_Report s ON s.ID = spd.Sales_Report_ID
     JOIN Product p ON p.ID = spd.product_id
@@ -355,15 +538,10 @@ BEGIN
     FROM Product p;
 END &&
 
-CREATE PROCEDURE insert_new_report_details(IN report_id INT, IN product_id INT, IN start_num INT, IN sold_num INT, IN trash_num INT, IN price DECIMAL(6,2), IN foodcost DECIMAL(6,2))
-BEGIN
-    INSERT INTO Sales_Report_Details VALUES(report_id, product_id,start_num, sold_num,trash_num,price,foodcost);
-END &&
-
 CREATE PROCEDURE fetch_single_product(IN id INT)
 BEGIN
     SELECT *
-    FROM product p
+    FROM Product p
     WHERE p.ID = id;
 END&&
 
@@ -372,12 +550,11 @@ BEGIN
 		SELECT 
             s.ID as report_id, 
             s.Date,
-            s.Comment, 
             sum(QuantitySold * ( PriceAtSale - FoodCostAtSale) - QuantityTrashed * FoodCostAtSale) as profit, 
             sum(QuantitySold * PriceAtSale) as revenue
+
 		FROM Sales_Report s
-		JOIN Sales_Report_Details spd  ON Sales_Report_ID = s.ID
-		JOIN Product p ON product_id = p.ID
+		JOIN Sales_Report_Details spd  ON spd.Sales_Report_ID = s.ID
         WHERE s.Date >= startDate AND s.Date <= endDate
 		GROUP BY report_id, Date
 		ORDER BY Date DESC;
@@ -394,6 +571,81 @@ BEGIN
     WHERE DatePlaced >= startDate AND DatePlaced <= endDate
     GROUP BY DatePlaced
     ORDER BY DatePlaced DESC;
+END&&
+
+CREATE PROCEDURE fetch_order_profit()
+BEGIN
+	SELECT 
+		IFNULL(sum(Quantity * (PriceAtSale - FoodCostAtSale)),0) as profit,
+		IFNULL(sum(Quantity * PriceAtSale),0) as revenue 
+	FROM `Order` o
+    JOIN Order_Details od ON od.order_id = o.ID;
+END&&
+
+
+CREATE PROCEDURE fetch_sale_profit()
+BEGIN
+		SELECT 
+            IFNULL(sum(QuantitySold * ( PriceAtSale - FoodCostAtSale) - QuantityTrashed * FoodCostAtSale),0) as profit, 
+            IFNULL(sum(QuantitySold * PriceAtSale),0) as revenue
+		FROM Sales_Report s
+		JOIN Sales_Report_Details spd  ON Sales_Report_ID = s.ID;
+END&&
+
+CREATE PROCEDURE fetch_order_profit_lastMonth()
+BEGIN
+	SELECT 
+		IFNULL(sum(Quantity * (PriceAtSale - FoodCostAtSale)),0) as profit,
+		IFNULL(sum(Quantity * PriceAtSale),0) as revenue 
+	FROM `Order` o
+    JOIN Order_Details od ON od.order_id = o.ID
+    WHERE YEAR(DatePlaced) <= YEAR(CURRENT_DATE - INTERVAL 1 MONTH)
+    AND MONTH(DatePlaced) <= MONTH(CURRENT_DATE - INTERVAL 1 MONTH);
+END&&
+
+CREATE PROCEDURE fetch_sale_profit_lastMonth()
+BEGIN
+		SELECT 
+            IFNULL(sum(QuantitySold * ( PriceAtSale - FoodCostAtSale) - QuantityTrashed * FoodCostAtSale),0) as profit, 
+            IFNULL(sum(QuantitySold * PriceAtSale),0) as revenue
+		FROM Sales_Report s
+		JOIN Sales_Report_Details spd  ON Sales_Report_ID = s.ID
+        WHERE YEAR(Date) <= YEAR(CURRENT_DATE - INTERVAL 1 MONTH)
+        AND MONTH(Date) <= MONTH(CURRENT_DATE - INTERVAL 1 MONTH);
+END&&
+
+CREATE PROCEDURE fetch_sales_two_weeks()
+BEGIN
+		SELECT 
+            SUM(StartQuantity) as quantity,
+            SUM(QuantityTrashed) as trash,
+            s.Date
+		FROM bakery.Sales_Report s
+		JOIN bakery.Sales_Report_Details spd  ON Sales_Report_ID = s.ID
+        WHERE s.Date >= DATE(NOW()) + INTERVAL -14  DAY
+            AND s.Date <  DATE(NOW()) + INTERVAL  0 DAY
+		GROUP BY s.Date
+        ORDER BY s.Date DESC;
+END&&
+CREATE PROCEDURE fetch_order_quantity()
+BEGIN
+		SELECT 
+            SUM(StartQuantity) as quantity,
+            SUM(QuantityTrashed) as trash,
+            s.Date
+		FROM bakery.Sales_Report s
+		JOIN bakery.Sales_Report_Details spd  ON Sales_Report_ID = s.ID
+        WHERE s.Date >= DATE(NOW()) + INTERVAL -14  DAY
+            AND s.Date <  DATE(NOW()) + INTERVAL  0 DAY
+		GROUP BY s.Date
+        ORDER BY s.Date DESC;
+END&&
+
+CREATE PROCEDURE fetch_sales_quantity()
+BEGIN
+		SELECT 
+           SUM(QuantitySold) as salesQuantity
+		FROM Sales_Report_Details spd;
 END&&
 
 DELIMITER ;

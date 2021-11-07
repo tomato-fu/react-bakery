@@ -28,10 +28,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import red from "@material-ui/core/colors/red";
 import MenuItem from "@mui/material/MenuItem";
 import CircularProgress from "@mui/material/CircularProgress";
-import DialogContentText from "@mui/material/DialogContentText";
+import SearchBar from "./SearchBar";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
-import { useIngredientsFetch } from "src/hooks/useIngredientsFetch";
+import { useIngredientsFetch } from "src/hooks/ingredient/useIngredientsFetch";
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -45,8 +45,8 @@ const validationSchema = yup.object({
     .number()
     .required("Please enter price")
     .moreThan(0, "Please enter a valid price"),
-  foodCost: yup.number(),
-  timeCost: yup.number(),
+  foodCost: yup.number().min(0, "Please enter a valid value"),
+  timeCost: yup.number().min(0, "Please enter a valid value"),
   comment: yup.string("Enter comment for customer"),
   ingredients: yup.array().of(
     yup.object({
@@ -91,25 +91,15 @@ const DialogContent = withStyles((theme) => ({
 
 const ProductListToolbar = (props) => {
   const [open, setOpen] = useState(false);
-  const { products, setProducts, update, setUpdate } = props;
+  const { products, setProducts, update, setUpdate, setKeyWord } = props;
 
-  const [openDelete, setOpenDelete] = useState(false);
   const [disable, setDisable] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
+  const [showError, setShowError] = useState(false);
   const { state: ingredients } = useIngredientsFetch();
   useEffect(() => {
     const timeout = setTimeout(() => {
       setShowSuccess(false);
-    }, 3000);
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [products]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setShowDelete(false);
     }, 3000);
     return () => {
       clearTimeout(timeout);
@@ -150,26 +140,7 @@ const ProductListToolbar = (props) => {
       </Box>
 
       <Box sx={{ mt: 3 }}>
-        <Card>
-          <CardContent>
-            <Box sx={{ maxWidth: 500 }}>
-              <TextField
-                fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SvgIcon fontSize="small" color="action">
-                        <SearchIcon />
-                      </SvgIcon>
-                    </InputAdornment>
-                  ),
-                }}
-                placeholder="Search product"
-                variant="outlined"
-              />
-            </Box>
-          </CardContent>
-        </Card>
+        <SearchBar setKeyWord={setKeyWord} />
       </Box>
 
       <div>
@@ -200,8 +171,7 @@ const ProductListToolbar = (props) => {
                 ingredients: [],
               }}
               validationSchema={validationSchema}
-              onSubmit={(values) => {
-                setDisable(true);
+              onSubmit={(values, formik) => {
                 //calculate the foodCost
 
                 if (values.foodCost === 0) {
@@ -215,41 +185,58 @@ const ProductListToolbar = (props) => {
                   });
                 }
 
-                axios
-                  .post("http://localhost:3004/products/createProduct", {
-                    productName: values.productName,
-                    price: values.price,
-                    foodCost: values.foodCost,
-                    timeCost: values.timeCost,
-                    comment: values.comment,
-                  })
-                  .then((res) => {
-                    const productID = res.data;
-                    axios
-                      .post("http://localhost:3004/recipes/createRecipe", {
-                        productID: productID,
-                        comment: values.comment,
-                      })
-                      .then(() => {
-                        values.ingredients.map((ingredient) => {
-                          axios.post(
-                            "http://localhost:3004/recipes/createRecipeIngredient",
-                            {
-                              recipeID: productID,
-                              ingredientID: ingredient.name,
-                              grams: ingredient.mass,
+                const uniqueIngredients = new Set(
+                  values.ingredients.map((item) => item.name)
+                );
+
+                if (uniqueIngredients.size < values.ingredients.length) {
+                  values.foodCost = 0;
+                  setShowError(true);
+                  setTimeout(() => {
+                    setShowError(false);
+                  }, 3000);
+                } else {
+                  setDisable(true);
+                  axios
+                    .post("http://localhost:3004/products/createProduct", {
+                      productName: values.productName,
+                      price: values.price,
+                      foodCost: values.foodCost,
+                      timeCost: values.timeCost,
+                      comment: values.comment,
+                    })
+                    .then((res) => {
+                      const productID = res.data;
+                      axios
+                        .post("http://localhost:3004/recipes/createRecipe", {
+                          productID: productID,
+                          comment: values.comment,
+                        })
+                        .then(() => {
+                          const allpromises = values.ingredients.map(
+                            (ingredient) => {
+                              const promise_axios = axios.post(
+                                "http://localhost:3004/recipes/createRecipeIngredient",
+                                {
+                                  recipeID: productID,
+                                  ingredientID: ingredient.name,
+                                  grams: ingredient.mass,
+                                }
+                              );
+                              return promise_axios;
                             }
                           );
+                          Promise.all(allpromises)
+                            .then(() => {
+                              setDisable(false);
+                              setShowSuccess(true);
+                              setUpdate(!update);
+                              formik.resetForm();
+                            })
+                            .catch(() => console.log("error"));
                         });
-                      });
-                  })
-                  .then(() => {
-                    setDisable(false);
-                    setShowSuccess(true);
-
-                    setUpdate(!update);
-                  })
-                  .catch(() => console.log("error"));
+                    });
+                }
               }}
             >
               {(formik) => (
@@ -343,7 +330,7 @@ const ProductListToolbar = (props) => {
                           id="foodCost"
                           fullWidth
                           type="number"
-                          label="Food Cost"
+                          label="Food Cost (leave 0 to calculate automatically)"
                           variant="standard"
                           onChange={formik.handleChange}
                           error={
@@ -561,7 +548,15 @@ const ProductListToolbar = (props) => {
                         severity="success"
                         sx={{ position: "fixed", top: 0 }}
                       >
-                        Create a new ingredient successfully!
+                        Create a new product successfully!
+                      </Alert>
+                    )}
+                    {showError && (
+                      <Alert
+                        severity="error"
+                        sx={{ position: "fixed", top: 0 }}
+                      >
+                        Don't select duplicated ingredient!
                       </Alert>
                     )}
                   </div>

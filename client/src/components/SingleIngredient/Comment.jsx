@@ -8,7 +8,8 @@ import {
   Typography,
 } from "@material-ui/core";
 import PerfectScrollbar from "react-perfect-scrollbar";
-const Comment = () => {
+
+const Comment = ({ text }) => {
   return (
     <Card sx={{ height: "100%" }}>
       <PerfectScrollbar>
@@ -16,7 +17,7 @@ const Comment = () => {
         <Divider />
         <CardContent>
           <Typography color="textSecondary" variant="h3">
-            The price of milk is going to increase next month.
+            {text}
           </Typography>
         </CardContent>
       </PerfectScrollbar>

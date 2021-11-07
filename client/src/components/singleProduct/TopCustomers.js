@@ -13,15 +13,20 @@ import {
   Select,
 } from "@material-ui/core";
 import React, { useState } from "react";
+import { useTopCustomerFetch } from "src/hooks/product/useTopCustomerFetch";
+const TopCustomers = ({ productID }) => {
+  const { state: customers, loading, error } = useTopCustomerFetch(productID);
 
-const TopCustomers = () => {
+  const names = Array.from(customers).map((item) => item.CustomerName);
+  const totals = Array.from(customers).map((item) => item.total);
+
   const data = {
-    labels: ["Josh", "Amy", "Daniel", "David", "Ken", "Michael", "Emily"],
+    labels: names,
     datasets: [
       {
         axis: "y",
         label: "Number Of Order",
-        data: [10, 9, 8, 7, 6, 5, 4],
+        data: totals,
         fill: false,
         backgroundColor: "rgba(255,99,132,0.2)",
         borderColor: "rgba(255,99,132,1)",

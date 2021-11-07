@@ -3,10 +3,18 @@ import { Box, Container } from "@material-ui/core";
 import CustomerListResults from "src/components/customer/CustomerListResults";
 
 import React, { useState } from "react";
-import { useCustomersFetch } from "src/hooks/useCutomersFetch";
+import { useCustomersKeyWordFetch } from "src/hooks/customer/useCustomersKeyWordFetch";
 const CustomerList = () => {
-  const { state, loading, error, setState, update, setUpdate } =
-    useCustomersFetch();
+  const {
+    state,
+    loading,
+    error,
+    setState,
+    update,
+    setUpdate,
+    keyWord,
+    setKeyWord,
+  } = useCustomersKeyWordFetch();
 
   return (
     <>
@@ -27,6 +35,8 @@ const CustomerList = () => {
               setCustomers={setState}
               update={update}
               setUpdate={setUpdate}
+              keyWord={keyWord}
+              setKeyWord={setKeyWord}
             />
           </Box>
         </Container>

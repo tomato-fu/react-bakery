@@ -10,26 +10,22 @@ import {
   useTheme,
 } from "@material-ui/core";
 import LaptopMacIcon from "@material-ui/icons/LaptopMac";
-import StoreIcon from "@material-ui/icons/Store";
-
-const TotalOrder = (props) => {
+import { useNumOrderFetch } from "src/hooks/customer/useNumOrderFetch";
+const TotalOrder = ({ customerID }) => {
   const theme = useTheme();
-
+  const { state: num, loading, error } = useNumOrderFetch(customerID);
+  const { numOrder } = num;
   const data = {
     datasets: [
       {
-        data: [60, 40],
-        backgroundColor: [
-          colors.indigo[500],
-          colors.red[600],
-          colors.orange[600],
-        ],
+        data: [numOrder],
+        backgroundColor: [colors.green[600]],
         borderWidth: 8,
         borderColor: colors.common.white,
         hoverBorderColor: colors.common.white,
       },
     ],
-    labels: ["Online", "In-store"],
+    labels: ["Online"],
   };
 
   const options = {
@@ -57,20 +53,14 @@ const TotalOrder = (props) => {
   const devices = [
     {
       title: "Online",
-      value: 60,
+      value: numOrder,
       icon: LaptopMacIcon,
-      color: colors.indigo[500],
-    },
-    {
-      title: "In-store",
-      value: 40,
-      icon: StoreIcon,
-      color: colors.red[600],
+      color: colors.red[500],
     },
   ];
 
   return (
-    <Card {...props}>
+    <Card>
       <CardHeader title="Orders Summary" />
       <Divider />
       <CardContent>
@@ -102,7 +92,7 @@ const TotalOrder = (props) => {
                 {title}
               </Typography>
               <Typography style={{ color }} variant="h2">
-                {value}%
+                {value}
               </Typography>
             </Box>
           ))}

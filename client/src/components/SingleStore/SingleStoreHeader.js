@@ -27,8 +27,8 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Database } from "react-feather";
-const SingleStoreHeader = () => {
-  const { storeID } = useParams();
+import moment from "moment";
+const SingleStoreHeader = ({ sale }) => {
   return (
     <Card sx={{ height: "100%" }}>
       <CardHeader title="Sales Info" />
@@ -44,7 +44,7 @@ const SingleStoreHeader = () => {
               Date:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              09/21/2021
+              {moment(sale.Date).format("YYYY-MM-DD")}
             </Typography>
           </Grid>
           <Grid item>
@@ -70,7 +70,7 @@ const SingleStoreHeader = () => {
               Opening Hours:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              8
+              {sale.Hours}
             </Typography>
           </Grid>
           <Grid item>
@@ -96,7 +96,7 @@ const SingleStoreHeader = () => {
               Revenue:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              450
+              ${sale.revenue}
             </Typography>
           </Grid>
           <Grid item>
@@ -122,7 +122,7 @@ const SingleStoreHeader = () => {
               Lost Revenue:
             </Typography>
             <Typography color="textSecondary" variant="h5">
-              50
+              ${sale.lost}
             </Typography>
           </Grid>
           <Grid item>
@@ -149,7 +149,7 @@ const SingleStoreHeader = () => {
             </Typography>
 
             <Typography color="textSecondary" variant="h5">
-              100
+              ${sale.profit}
             </Typography>
           </Grid>
           <Grid item>

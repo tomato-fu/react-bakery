@@ -13,15 +13,20 @@ import {
   Select,
 } from "@material-ui/core";
 import React, { useState } from "react";
+import { useFavoFetch } from "src/hooks/customer/useFavoFetch";
+const FavoriateProduct = ({ customerID }) => {
+  const { state: products, loading, error } = useFavoFetch(customerID);
 
-const FavoriateProduct = () => {
+  const names = Array.from(products).map((item) => item.name);
+  const totals = Array.from(products).map((item) => item.total);
+
   const data = {
-    labels: ["A", "B", "C", "D", "E", "F", "G"],
+    labels: names,
     datasets: [
       {
         axis: "y",
         label: "Favoriate Product",
-        data: [5, 6, 5, 4, 7, 11, 4],
+        data: totals,
         fill: false,
         backgroundColor: "rgba(255,99,132,0.2)",
         borderColor: "rgba(255,99,132,1)",

@@ -13,10 +13,18 @@ import {
   Select,
 } from "@material-ui/core";
 import React, { useState } from "react";
-
+import moment from "moment";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import { useSalesLast14Fetch } from "src/hooks/sale/useSalesLast14Fetch";
 
 const Sales = (props) => {
+  const { state, loading, error } = useSalesLast14Fetch();
+  const sold = state.map((item) => item.quantity);
+  const trash = state.map((item) => item.trash);
+  const date = state.map((item) =>
+    moment(item.Date).format("YYYY-MM-DD").slice(5)
+  );
+
   const theme = useTheme();
   const [days, setDays] = useState(7);
   const handleChange = (event) => {
@@ -26,31 +34,16 @@ const Sales = (props) => {
     datasets: [
       {
         backgroundColor: colors.indigo[500],
-        data: [18, 5, 19, 27, 29, 19, 20, 18, 5, 19, 27, 29, 19, 20],
-        label: "Online orders",
+        data: sold,
+        label: "Quantity Sold",
       },
       {
         backgroundColor: colors.grey[200],
-        data: [11, 20, 12, 29, 30, 25, 13, 18, 5, 19, 27, 29, 19, 20],
-        label: "In-store sales",
+        data: trash,
+        label: "Quantity Trashed",
       },
     ],
-    labels: [
-      "1 Aug",
-      "2 Aug",
-      "3 Aug",
-      "4 Aug",
-      "5 Aug",
-      "6 Aug",
-      "7 Aug",
-      "8 Aug",
-      "9 Aug",
-      "10 Aug",
-      "11 Aug",
-      "12 Aug",
-      "13 Aug",
-      "14 Aug",
-    ],
+    labels: date,
   };
 
   const options = {
@@ -143,9 +136,9 @@ const Sales = (props) => {
               ...data,
               datasets: data.datasets.map((item) => ({
                 ...item,
-                data: item.data.slice(0, days),
+                data: item.data.slice(-days),
               })),
-              labels: data.labels.slice(0, days),
+              labels: data.labels.slice(-days),
             }}
             options={options}
           />
@@ -164,6 +157,7 @@ const Sales = (props) => {
           endIcon={<ArrowRightIcon />}
           size="small"
           variant="text"
+          href={`/app/sales`}
         >
           Overview
         </Button>
